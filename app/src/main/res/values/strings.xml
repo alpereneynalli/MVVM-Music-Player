@@ -1,0 +1,9 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="LANGUAGE">Language</string>
+    <string name="AUDIO_PLAYER">Audio Player</string>
+    <string name="SEARCH_MUSIC">Search Music</string>
+    <string name="FAVORITES">Favorites</string>
+    <string name="DOWNLOADED">Downloaded</string>
+    <string name="SOUND_EFFECTS">Sound Effects</string>
+    <string name="MY_FILES">My Files</string>
+</resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="LANGUAGE">Dil</string>
+    <string name="AUDIO_PLAYER">Audio Player</string>
+    <string name="SEARCH_MUSIC" />
+    <string name="FAVORITES" />
+    <string name="DOWNLOADED" />
+    <string name="SOUND_EFFECTS" />
+    <string name="MY_FILES" />
+</resources>
