@@ -44,6 +44,6 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
-        //ActivityUtils.hideStatusBar(this)
+
     }
 }
