@@ -3,7 +3,7 @@ package com.player
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.player.audioPlayer.MediaPlayerViewModel
@@ -15,33 +15,35 @@ import com.player.viewmodel.AddMusicViewModel
 import com.player.viewmodel.AddMusicViewModelFactory
 import com.google.firebase.FirebaseApp
 
-class MainActivity  : ComponentActivity() {
+class MainActivity : ComponentActivity() {
 
-    private val viewModel: AddMusicViewModel by viewModels()
-    lateinit var navController: NavHostController
-    private val audioPlayerViewModel: MediaPlayerViewModel by viewModels()
+    private lateinit var addMusicViewModel: AddMusicViewModel
+    private lateinit var audioPlayerViewModel: MediaPlayerViewModel
+    private lateinit var navController: NavHostController
     private lateinit var appDatabase: AppDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         appDatabase = AppDatabase.getInstance(applicationContext)
+
+        // Initialize ViewModels
         val viewModelFactory = AddMusicViewModelFactory(appDatabase, applicationContext)
-        val viewModel: AddMusicViewModel by viewModels(factoryProducer = { viewModelFactory })
+        addMusicViewModel = ViewModelProvider(this, viewModelFactory).get(AddMusicViewModel::class.java)
+
         val mediaPlayerViewModelFactory = MediaPlayerViewModelFactory(applicationContext)
-        val audioPlayerViewModel: MediaPlayerViewModel by viewModels(factoryProducer = { mediaPlayerViewModelFactory})
+        audioPlayerViewModel = ViewModelProvider(this, mediaPlayerViewModelFactory).get(MediaPlayerViewModel::class.java)
+
         setContent {
             AddMusicPageTheme {
                 navController = rememberNavController()
-                SetupNavGraph(navController = navController, viewModel = viewModel, audioPlayerViewModel = audioPlayerViewModel)
+                SetupNavGraph(
+                    navController = navController,
+                    viewModel = addMusicViewModel,
+                    audioPlayerViewModel = audioPlayerViewModel
+                )
             }
         }
         //ActivityUtils.hideStatusBar(this)
     }
 }
-
-
-
-
-
-
