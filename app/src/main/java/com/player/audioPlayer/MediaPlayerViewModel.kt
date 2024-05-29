@@ -25,6 +25,9 @@ class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicat
     ViewModel() {
     companion object {
         private const val TAG = "MediaPlayerViewModel"
+        private const val UPDATE_INTERVAL_MS = 50L
+        private const val PLAYBACK_STATE_READY = 3
+        private const val PLAYBACK_STATE_ENDED = 4
     }
 
     private val _currentMinutes = MutableLiveData(0)
@@ -36,17 +39,19 @@ class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicat
     private val _duration = MutableLiveData(0L)
     val duration: LiveData<Long> get() = _duration
 
+    private var _exoPlayer: ExoPlayer? = null
+    val exoPlayer: ExoPlayer
+        get() = _exoPlayer ?: throw IllegalStateException("ExoPlayer is not initialized")
+
     private val handler = Handler(Looper.getMainLooper())
-    private var exoPlayer: ExoPlayer? = null
-    private var downloadCache: Cache? = null
 
     val progressRunnable: Runnable = object : Runnable {
         override fun run() {
 
-            if (exoPlayer != null) {
-                val newPosition = exoPlayer?.currentPosition?.toInt()
-                if (newPosition != _currentMinutes.value) {
-                    _currentMinutes.value = newPosition
+            _exoPlayer?.currentPosition?.toInt()?.let {
+                // Update _currentMinutes only if the new position is different
+                if (it != _currentMinutes.value) {
+                    _currentMinutes.value = it
                 }
             }
 
@@ -63,11 +68,11 @@ class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicat
 
 
     fun seekTo(position: Int) {
-        exoPlayer!!.seekTo(position.toLong())
+        exoPlayer.seekTo(position.toLong())
     }
 
     fun forward(seconds: Int) {
-        seekTo(exoPlayer!!.currentPosition.toInt() + seconds * 1000)
+        seekTo((exoPlayer.currentPosition.toInt()) + seconds * 1000)
     }
 
     fun backward(seconds: Int) {
@@ -92,46 +97,52 @@ class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicat
 
     fun destroy() {
         cancelTimerTask()
-        exoPlayer = null
+        _exoPlayer = null
     }
 
     fun play() {
-        exoPlayer!!.play()
+        exoPlayer.play()
     }
 
     fun pause() {
-        exoPlayer!!.pause()
+        exoPlayer.pause()
     }
 
     fun initExoPlayer(audioFile: Uri) {
-        exoPlayer = ExoPlayer.Builder(applicationContext).build()
-        exoPlayer!!.setMediaItem(MediaItem.fromUri(audioFile))
-        exoPlayer!!.prepare()
+        if (_exoPlayer == null) {
+            _exoPlayer = ExoPlayer.Builder(applicationContext).build().apply {
+                setMediaItem(MediaItem.fromUri(audioFile))
+                prepare()
+                addListener(object : Player.Listener {
+                    override fun onIsPlayingChanged(isPlaying: Boolean) {
+                        Log.d(TAG, "isPlayingChangedTriggered")
+                        _isPlaying.value = isPlaying
+                        if (isPlaying) {
+                            _audioFinish.value = false
+                            handler.post(progressRunnable)
+                        } else {
+                            handler.removeCallbacks(progressRunnable)
+                        }
+                    }
 
-        exoPlayer?.addListener(object : Player.Listener {
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                Log.d(TAG, "isPlayingChangedTriggered")
-                if (isPlaying) {
-                    _isPlaying.value = true
-                    _audioFinish.value = false
-                    handler.post(progressRunnable)
-                } else {
-                    _isPlaying.value = false
-                }
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        when (playbackState) {
+                            PLAYBACK_STATE_ENDED -> {
+                                _audioFinish.value = true
+                                Log.d(TAG, "onFinish: Media Player Finished")
+                                handler.removeCallbacks(progressRunnable)
+                            }
+                            PLAYBACK_STATE_READY -> {
+                                _duration.postValue(_exoPlayer?.duration)
+                            }
+                        }
+                    }
+                })
             }
-
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == 4) {
-                    _audioFinish.value = true
-                    Log.d(TAG, "onFinish: Media Player Finished")
-                    handler.removeCallbacks(progressRunnable)
-                }
-                if (playbackState == 3) {
-                    _duration.postValue(exoPlayer!!.contentDuration)
-                }
-            }
-        })
-
+        } else {
+            _exoPlayer?.setMediaItem(MediaItem.fromUri(audioFile))
+            _exoPlayer?.prepare()
+        }
     }
 
     fun loadFileFromFirebase(
