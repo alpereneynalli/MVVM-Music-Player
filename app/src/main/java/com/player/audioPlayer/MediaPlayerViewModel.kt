@@ -21,14 +21,12 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
-class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicationContext: Context) :
+class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicationContext: Context, private val storage: FirebaseStorage) :
     ViewModel() {
     companion object {
         private const val TAG = "MediaPlayerViewModel"
-
     }
 
-    private val storage: FirebaseStorage = FirebaseStorage.getInstance();
     private val _currentMinutes = MutableLiveData(0)
     val currentMinutes: LiveData<Int> get() = _currentMinutes
     private val _audioFinish = MutableLiveData(false)

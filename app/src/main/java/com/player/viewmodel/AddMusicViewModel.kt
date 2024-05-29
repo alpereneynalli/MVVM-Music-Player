@@ -32,7 +32,7 @@ import java.io.FileInputStream
 import java.util.UUID
 
 class AddMusicViewModel(
-    private val appDatabase: AppDatabase,
+    private val appDatabase: AppDatabase, private val storage: FirebaseStorage,
     @SuppressLint("StaticFieldLeak") private val applicationContext: Context
 ) : ViewModel() {
     var currentExpandedItemId by mutableStateOf(-1)
@@ -125,10 +125,8 @@ class AddMusicViewModel(
     }
 
     private fun loadSongDataFromFirebase() {
-        val storageReference =
-            FirebaseStorage.getInstance().getReference().child("_db_songs.json")
+        val storageReference = storage.getReference().child("_db_songs.json")
         Log.d("FIRE", "started")
-        // Create a temporary local file to store the downloaded JSON
 
         val cacheDir = applicationContext.cacheDir
         val localFile = File(cacheDir, "songsTemp.json")

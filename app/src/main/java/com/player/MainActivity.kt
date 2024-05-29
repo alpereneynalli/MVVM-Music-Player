@@ -14,6 +14,8 @@ import com.player.ui.theme.AddMusicPageTheme
 import com.player.viewmodel.AddMusicViewModel
 import com.player.viewmodel.AddMusicViewModelFactory
 import com.google.firebase.FirebaseApp
+import com.google.firebase.storage.FirebaseStorage
+import com.player.utils.FirebaseStorageInstance
 
 class MainActivity : ComponentActivity() {
 
@@ -21,17 +23,19 @@ class MainActivity : ComponentActivity() {
     private lateinit var audioPlayerViewModel: MediaPlayerViewModel
     private lateinit var navController: NavHostController
     private lateinit var appDatabase: AppDatabase
+    private lateinit var storage: FirebaseStorage
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         appDatabase = AppDatabase.getInstance(applicationContext)
+        storage = FirebaseStorageInstance.instance
 
         // Initialize ViewModels
-        val viewModelFactory = AddMusicViewModelFactory(appDatabase, applicationContext)
+        val viewModelFactory = AddMusicViewModelFactory(appDatabase, storage, applicationContext)
         addMusicViewModel = ViewModelProvider(this, viewModelFactory).get(AddMusicViewModel::class.java)
 
-        val mediaPlayerViewModelFactory = MediaPlayerViewModelFactory(applicationContext)
+        val mediaPlayerViewModelFactory = MediaPlayerViewModelFactory(applicationContext, storage)
         audioPlayerViewModel = ViewModelProvider(this, mediaPlayerViewModelFactory).get(MediaPlayerViewModel::class.java)
 
         setContent {
