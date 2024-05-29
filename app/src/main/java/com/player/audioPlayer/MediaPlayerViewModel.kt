@@ -14,12 +14,15 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.datasource.cache.Cache
 import androidx.media3.exoplayer.ExoPlayer
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicationContext: Context, private val storage: FirebaseStorage) :
     ViewModel() {
@@ -43,29 +46,22 @@ class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicat
     val exoPlayer: ExoPlayer
         get() = _exoPlayer ?: throw IllegalStateException("ExoPlayer is not initialized")
 
-    private val handler = Handler(Looper.getMainLooper())
+    init {
+        startUpdatingProgress()
+    }
 
-    val progressRunnable: Runnable = object : Runnable {
-        override fun run() {
-
-            _exoPlayer?.currentPosition?.toInt()?.let {
-                // Update _currentMinutes only if the new position is different
-                if (it != _currentMinutes.value) {
-                    _currentMinutes.value = it
+    private fun startUpdatingProgress() {
+        viewModelScope.launch {
+            while (true) {
+                _exoPlayer?.currentPosition?.toInt()?.let {
+                    if (it != _currentMinutes.value) {
+                        _currentMinutes.value = it
+                    }
                 }
+                delay(UPDATE_INTERVAL_MS)
             }
-
-            handler.postDelayed(this, 50)
-
         }
     }
-
-
-    private fun cancelTimerTask() {
-        Log.d(TAG, "cancelTimerTask: ")
-        handler.removeCallbacks(progressRunnable)
-    }
-
 
     fun seekTo(position: Int) {
         exoPlayer.seekTo(position.toLong())
@@ -76,16 +72,16 @@ class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicat
     }
 
     fun backward(seconds: Int) {
-        seekTo(exoPlayer!!.currentPosition.toInt() - seconds * 1000)
+        seekTo(exoPlayer.currentPosition.toInt() - seconds * 1000)
     }
 
     fun release() {
-        if (exoPlayer != null){
-            exoPlayer!!.stop()
-            exoPlayer!!.release()
+        _exoPlayer?.let {
+            it.stop()
+            it.release()
         }
+        _exoPlayer = null
     }
-
 
     fun formatMilliseconds(milliseconds: Int): String {
         val totalSeconds = milliseconds / 1000
@@ -96,7 +92,6 @@ class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicat
     }
 
     fun destroy() {
-        cancelTimerTask()
         _exoPlayer = null
     }
 
@@ -119,9 +114,6 @@ class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicat
                         _isPlaying.value = isPlaying
                         if (isPlaying) {
                             _audioFinish.value = false
-                            handler.post(progressRunnable)
-                        } else {
-                            handler.removeCallbacks(progressRunnable)
                         }
                     }
 
@@ -130,7 +122,6 @@ class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicat
                             PLAYBACK_STATE_ENDED -> {
                                 _audioFinish.value = true
                                 Log.d(TAG, "onFinish: Media Player Finished")
-                                handler.removeCallbacks(progressRunnable)
                             }
                             PLAYBACK_STATE_READY -> {
                                 _duration.postValue(_exoPlayer?.duration)
