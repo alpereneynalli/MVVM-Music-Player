@@ -27,8 +27,10 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontVariation.weight
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,6 +71,10 @@ fun SongListItem(
     val randomIndex = remember { Random.nextInt(0, gradientCombinations.size) }
     val selectedCombination = gradientCombinations[randomIndex]
     val downloadProgress by addMusicViewModel.downloadProgress.observeAsState(0)
+    val context = LocalContext.current
+
+    val currentPlayingSongId = remember { mutableStateOf<Int?>(null) }
+
     Log.d("SongListItem", "Download Progress: $downloadProgress")
 
     Column(
@@ -91,16 +98,16 @@ fun SongListItem(
                     .padding(horizontal = 16.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.musiclogo), // Replace with your music logo drawable
+                    painter = painterResource(id = R.drawable.musiclogo),
                     contentDescription = null,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .size(48.dp)
-                        .clip(RoundedCornerShape(24.dp)) // Half of the width to make it circular
+                        .clip(RoundedCornerShape(24.dp))
                         .background(
                             Brush.linearGradient(
                                 selectedCombination.colors,
-                                start = Offset(50f, 0f), // Top middle
+                                start = Offset(50f, 0f),
                                 end = Offset(50f, 100f)
                             )
                         )
@@ -109,37 +116,39 @@ fun SongListItem(
                     alignment = Alignment.Center
                 )
                 Spacer(modifier = Modifier.width(16.dp))
-                Box(modifier = Modifier.weight(12f)) {
-                    Column() {
-                        Text(
-                            text = song.songName,
-                            color = Color.White,
-                            fontFamily = montserratFont,
-                            fontWeight = FontWeight.W500,
-                            fontSize = 12.sp
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = song.musician, color = Color.White, fontFamily = montserratFont,
-                            fontWeight = FontWeight.W300,
-                            fontSize = 10.sp
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = song.duration, color = Color.White, fontFamily = montserratFont,
-                            fontWeight = FontWeight.W300,
-                            fontSize = 10.sp
-                        )
-                    }
+                Box(modifier = Modifier.weight(1f)) {
+                Column {
+                    Text(
+                        text = song.songName,
+                        color = Color.White,
+                        fontFamily = montserratFont,
+                        fontWeight = FontWeight.W500,
+                        fontSize = 12.sp
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = song.musician,
+                        color = Color.White,
+                        fontFamily = montserratFont,
+                        fontWeight = FontWeight.W300,
+                        fontSize = 10.sp
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = song.duration,
+                        color = Color.White,
+                        fontFamily = montserratFont,
+                        fontWeight = FontWeight.W300,
+                        fontSize = 10.sp
+                    )
                 }
-                Spacer(modifier = Modifier.weight(1f))
+            }
+                Spacer(modifier = Modifier.width(16.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    IconButton(
-                        onClick = onFavoriteToggle
-                    ) {
+                    IconButton(onClick = onFavoriteToggle) {
                         Icon(
                             imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Favorite",
@@ -153,9 +162,7 @@ fun SongListItem(
                             tint = Color.White
                         )
                     } else {
-                        // Display download button or progress based on downloadProgress
                         if (downloadProgress in 1..99) {
-                            // Display progress if download in progress
                             CircularProgressIndicator(
                                 progress = downloadProgress.toFloat() / 100f,
                                 modifier = Modifier.size(24.dp),
@@ -163,7 +170,6 @@ fun SongListItem(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         } else {
-                            // Display download button if download not yet started or completed
                             IconButton(onClick = onDownloadClicked) {
                                 Icon(
                                     imageVector = Icons.Default.Download,
@@ -179,39 +185,34 @@ fun SongListItem(
 
         if (isExpanded) {
             Spacer(modifier = Modifier.height(8.dp))
-            audioPlayerViewModel.release()
-            if (isDownloaded) {
-                audioPlayerViewModel.triggerMediaScan(context = LocalContext.current, song.fileName)
-                val localUri =
-                    audioPlayerViewModel.getDownloadedFileUri(LocalContext.current, song.fileName)
 
-                if (localUri != null) {
-                    // Use the local URI for your ExoPlayer or other components here
-                    audioPlayerViewModel.initExoPlayer(localUri)
-                } else {
-                    // Handle the case where the file is marked as downloaded but the URI is null
-                    Log.e("EXO", "Local URI is null for downloaded file: ${song.fileName}")
+            LaunchedEffect(song.songID, isDownloaded) {
+                if (currentPlayingSongId.value != song.songID) {
+                    if (isDownloaded) {
+                        audioPlayerViewModel.triggerMediaScan(context, song.fileName)
+                        val localUri = audioPlayerViewModel.getDownloadedFileUri(context, song.fileName)
+                        if (localUri != null) {
+                            audioPlayerViewModel.initExoPlayer(localUri)
+                        }
+                    } else {
+                        audioPlayerViewModel.loadFileFromFirebase(
+                            callback = { uri ->
+                                audioPlayerViewModel.initExoPlayer(uri)
+                            },
+                            errorCallback = { errorMessage ->
+                                Log.d("EXO", errorMessage)
+                            },
+                            song.fileName
+                        )
+                    }
+                    currentPlayingSongId.value = song.songID
                 }
-            } else {
-                audioPlayerViewModel.loadFileFromFirebase(
-                    callback = { uri ->
-                        // Use the URI for your ExoPlayer or other components here
-                        audioPlayerViewModel.initExoPlayer(uri)
-
-                    },
-                    errorCallback = { errorMessage ->
-                        // Handle the error, e.g., display an error message
-                        Log.d("EXO", errorMessage)
-                    },
-                    song.fileName
-                )
             }
 
             Column {
                 PlayerSlider(audioPlayerViewModel)
                 PlayerButtons(audioPlayerViewModel)
             }
-
         }
     }
 }

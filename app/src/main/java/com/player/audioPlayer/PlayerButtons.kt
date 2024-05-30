@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.PauseCircleFilled
 import androidx.compose.material.icons.filled.PlayCircleFilled
 import androidx.compose.material.icons.filled.Replay10
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +32,7 @@ fun PlayerButtons(
     playerButtonSize: Dp = 48.dp,
     sideButtonSize: Dp = 36.dp
 ) {
-    val isPlaying = viewModel.isPlaying.observeAsState()
+    val isPlaying by viewModel.isPlaying.observeAsState(initial = false)
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -55,10 +56,10 @@ fun PlayerButtons(
         )
         Image(
             imageVector =
-            if (isPlaying.value == false) {
-                Icons.Filled.PlayCircleFilled
-            } else {
+            if (isPlaying) {
                 Icons.Filled.PauseCircleFilled
+            } else {
+                Icons.Filled.PlayCircleFilled
             },
             contentDescription = "Play / Pause Icon",
             contentScale = ContentScale.Fit,
@@ -67,13 +68,12 @@ fun PlayerButtons(
                 .size(playerButtonSize)
                 .semantics { role = Role.Button }
                 .clickable {
-                    if (isPlaying.value == false) {
+                    if (isPlaying) {
+                        Log.d("EXO", "pausing")
+                        viewModel.pause()
+                    } else {
                         Log.d("EXO", "playing")
                         viewModel.play()
-
-                    } else {
-                        viewModel.pause()
-                        Log.d("EXO", "pausing")
                     }
                 }
         )
@@ -89,6 +89,5 @@ fun PlayerButtons(
                     viewModel.forward(10)
                 }
         )
-
     }
 }

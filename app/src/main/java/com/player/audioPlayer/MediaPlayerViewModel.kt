@@ -24,8 +24,7 @@ import kotlinx.coroutines.launch
 class MediaPlayerViewModel(
     @SuppressLint("StaticFieldLeak") private val applicationContext: Context,
     private val storage: FirebaseStorage
-) :
-    ViewModel() {
+) : ViewModel() {
     companion object {
         private const val TAG = "MediaPlayerViewModel"
         private const val UPDATE_INTERVAL_MS = 50L
@@ -45,6 +44,9 @@ class MediaPlayerViewModel(
     private var _exoPlayer: ExoPlayer? = null
     val exoPlayer: ExoPlayer
         get() = _exoPlayer ?: throw IllegalStateException("ExoPlayer is not initialized")
+
+    private var lastPosition: Long = 0L
+    private var lastMediaItem: MediaItem? = null
 
     init {
         startUpdatingProgress()
@@ -106,8 +108,10 @@ class MediaPlayerViewModel(
     fun initExoPlayer(audioFile: Uri) {
         if (_exoPlayer == null) {
             _exoPlayer = ExoPlayer.Builder(applicationContext).build().apply {
-                setMediaItem(MediaItem.fromUri(audioFile))
+                lastMediaItem = MediaItem.fromUri(audioFile)
+                setMediaItem(lastMediaItem!!)
                 prepare()
+                seekTo(lastPosition)
                 addListener(object : Player.Listener {
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         Log.d(TAG, "isPlayingChangedTriggered")
@@ -132,8 +136,13 @@ class MediaPlayerViewModel(
                 })
             }
         } else {
-            _exoPlayer?.setMediaItem(MediaItem.fromUri(audioFile))
-            _exoPlayer?.prepare()
+            val newMediaItem = MediaItem.fromUri(audioFile)
+            if (newMediaItem != lastMediaItem) {
+                _exoPlayer?.setMediaItem(newMediaItem)
+                _exoPlayer?.prepare()
+                _exoPlayer?.seekTo(lastPosition)
+                lastMediaItem = newMediaItem
+            }
         }
     }
 
