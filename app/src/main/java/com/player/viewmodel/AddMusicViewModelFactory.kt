@@ -1,20 +1,16 @@
 package com.player.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.google.firebase.storage.FirebaseStorage
-import com.player.roomdb.AppDatabase
+import com.player.repository.MusicRepository
 
 class AddMusicViewModelFactory(
-    private val appDatabase: AppDatabase,
-    private val storage: FirebaseStorage,
-    private val applicationContext: Context
+    private val musicRepository: MusicRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(AddMusicViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return AddMusicViewModel(appDatabase, storage, applicationContext) as T
+            return AddMusicViewModel(musicRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -27,12 +27,13 @@ import com.player.ui.theme.selectedCategoryColor
 import com.player.viewmodel.AddMusicViewModel
 
 @Composable
-fun SquareButtonWithImage(text: String,
-                          categoryName: String,
-                          selected: Boolean,
-                          onClick: () -> Unit,
-                          onSelected: () -> Unit,
-                          viewModel: AddMusicViewModel
+fun SquareButtonWithImage(
+    text: String,
+    categoryName: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    onSelected: () -> Unit,
+    viewModel: AddMusicViewModel
 ) {
 
     val borderColor = if (selected) selectedCategoryColor else Color.Transparent

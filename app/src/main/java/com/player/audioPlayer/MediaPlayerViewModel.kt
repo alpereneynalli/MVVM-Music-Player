@@ -7,8 +7,6 @@ import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
-import android.os.Handler
-import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -17,14 +15,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.datasource.cache.Cache
 import androidx.media3.exoplayer.ExoPlayer
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicationContext: Context, private val storage: FirebaseStorage) :
+class MediaPlayerViewModel(
+    @SuppressLint("StaticFieldLeak") private val applicationContext: Context,
+    private val storage: FirebaseStorage
+) :
     ViewModel() {
     companion object {
         private const val TAG = "MediaPlayerViewModel"
@@ -123,6 +123,7 @@ class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicat
                                 _audioFinish.value = true
                                 Log.d(TAG, "onFinish: Media Player Finished")
                             }
+
                             PLAYBACK_STATE_READY -> {
                                 _duration.postValue(_exoPlayer?.duration)
                             }
@@ -181,8 +182,11 @@ class MediaPlayerViewModel(@SuppressLint("StaticFieldLeak") private val applicat
 
         return null
     }
+
     fun triggerMediaScan(context: Context, fileName: String) {
-        val downloadsDirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString()
+        val downloadsDirPath =
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                .toString()
         val filePath = "$downloadsDirPath/$fileName"
 
         MediaScannerConnection.scanFile(

@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="LANGUAGE">Language</string>
     <string name="AUDIO_PLAYER">Audio Player</string>
     <string name="SEARCH_MUSIC">Search Music</string>

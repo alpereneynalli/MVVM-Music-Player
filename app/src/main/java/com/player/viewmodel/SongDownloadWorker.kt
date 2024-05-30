@@ -27,14 +27,16 @@ class SongDownloadWorker(
             val storage = FirebaseStorage.getInstance()
             val storageRef = storage.reference.child("OnlineSongs").child(songName)
 
-            val downloadDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val downloadDirectory =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
             val localFile = File(downloadDirectory, songName)
 
             val task = storageRef.getFile(localFile)
 
             // Attach progress listener
             task.addOnProgressListener { taskSnapshot ->
-                val progress = (100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount).toInt()
+                val progress =
+                    (100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount).toInt()
                 Log.d("WORKER", "WorkerProgress: $progress")
                 progressListener?.onProgress(progress)
             }

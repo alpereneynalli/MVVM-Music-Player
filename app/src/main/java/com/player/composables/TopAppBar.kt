@@ -17,7 +17,15 @@ import com.player.ui.theme.montserratFont
 @Composable
 fun TopAppBar(text: String, navController: NavController) {
     androidx.compose.material.TopAppBar(
-        title = { Text(text = text, color = Color.White, fontFamily = montserratFont, fontWeight = FontWeight.W500, fontSize = 14.sp)},
+        title = {
+            Text(
+                text = text,
+                color = Color.White,
+                fontFamily = montserratFont,
+                fontWeight = FontWeight.W500,
+                fontSize = 14.sp
+            )
+        },
         navigationIcon = {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(

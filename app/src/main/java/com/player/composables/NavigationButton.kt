@@ -35,7 +35,13 @@ fun IconButtonWithText(
             .background(color = backgroundColor, shape = RoundedCornerShape(8.dp))
             .size(160.dp, 32.dp)
     ) {
-        Text(text = text, color = Color.White, fontFamily = montserratFont, fontWeight = FontWeight.W500, fontSize = 10.sp)
+        Text(
+            text = text,
+            color = Color.White,
+            fontFamily = montserratFont,
+            fontWeight = FontWeight.W500,
+            fontSize = 10.sp
+        )
         Icon(imageVector = icon, contentDescription = null, tint = Color.White)
         Spacer(modifier = Modifier.width(4.dp))
     }

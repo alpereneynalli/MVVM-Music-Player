@@ -27,7 +27,11 @@ import com.player.viewmodel.AddMusicViewModel
 
 
 @Composable
-fun DownloadedFilesPage(navController: NavController, viewModel: AddMusicViewModel, audioPlayerViewModel: MediaPlayerViewModel) {
+fun DownloadedFilesPage(
+    navController: NavController,
+    viewModel: AddMusicViewModel,
+    audioPlayerViewModel: MediaPlayerViewModel
+) {
     val favoriteSongIds by viewModel.favoriteSongIds
     val downloadedSongIds by viewModel.downloadedSongIds
     Surface(
@@ -42,7 +46,12 @@ fun DownloadedFilesPage(navController: NavController, viewModel: AddMusicViewMod
         ) {
             Scaffold(
                 backgroundColor = Color.Transparent,
-                topBar = { TopAppBar(text = stringResource(id = R.string.FAVORITES), navController) },
+                topBar = {
+                    TopAppBar(
+                        text = stringResource(id = R.string.FAVORITES),
+                        navController
+                    )
+                },
                 content = { padding ->
                     Column(
                         modifier = Modifier
@@ -70,7 +79,7 @@ fun DownloadedFilesPage(navController: NavController, viewModel: AddMusicViewMod
                                     },
                                     onDownloadClicked = {
                                         // Handle download button click
-                                        viewModel.scheduleSongDownload(favoriteSong.songID, favoriteSong.fileName)
+                                        //viewModel.scheduleSongDownload(favoriteSong.songID, favoriteSong.fileName)
                                     },
                                     audioPlayerViewModel,
                                     viewModel

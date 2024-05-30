@@ -8,8 +8,8 @@ data class OnlineSong(
     val songName: String,
     val sourceURL: String,
     var songID: Int,
-){
-    fun setSongID(){
+) {
+    fun setSongID() {
         songID = songName.hashCode()
     }
 }

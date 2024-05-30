@@ -15,26 +15,40 @@ fun SetupNavGraph(
     navController: NavHostController,
     viewModel: AddMusicViewModel,
     audioPlayerViewModel: MediaPlayerViewModel
-){
-    NavHost(navController = navController,
-        startDestination = Screen.AddMusicPage.route){
+) {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.AddMusicPage.route
+    ) {
 
         composable(
             route = Screen.AddMusicPage.route
-        ){
-            AddMusicPage(navController = navController,viewModel = viewModel, audioPlayerViewModel = audioPlayerViewModel)
+        ) {
+            AddMusicPage(
+                navController = navController,
+                viewModel = viewModel,
+                audioPlayerViewModel = audioPlayerViewModel
+            )
         }
 
         composable(
             route = Screen.Favorites.route
-        ){
-            FavoritesPage(navController = navController, viewModel = viewModel, audioPlayerViewModel = audioPlayerViewModel)
+        ) {
+            FavoritesPage(
+                navController = navController,
+                viewModel = viewModel,
+                audioPlayerViewModel = audioPlayerViewModel
+            )
         }
 
         composable(
             route = Screen.Downloaded.route
-        ){
-            DownloadedFilesPage(navController = navController, viewModel = viewModel, audioPlayerViewModel = audioPlayerViewModel)
+        ) {
+            DownloadedFilesPage(
+                navController = navController,
+                viewModel = viewModel,
+                audioPlayerViewModel = audioPlayerViewModel
+            )
         }
     }
 }

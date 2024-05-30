@@ -119,13 +119,17 @@ fun SongListItem(
                             fontSize = 12.sp
                         )
                         Spacer(modifier = Modifier.height(2.dp))
-                        Text(text = song.musician, color = Color.White ,fontFamily = montserratFont,
+                        Text(
+                            text = song.musician, color = Color.White, fontFamily = montserratFont,
                             fontWeight = FontWeight.W300,
-                            fontSize = 10.sp)
+                            fontSize = 10.sp
+                        )
                         Spacer(modifier = Modifier.height(2.dp))
-                        Text(text = song.duration, color = Color.White,fontFamily = montserratFont,
+                        Text(
+                            text = song.duration, color = Color.White, fontFamily = montserratFont,
                             fontWeight = FontWeight.W300,
-                            fontSize = 10.sp)
+                            fontSize = 10.sp
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
@@ -178,16 +182,17 @@ fun SongListItem(
             audioPlayerViewModel.release()
             if (isDownloaded) {
                 audioPlayerViewModel.triggerMediaScan(context = LocalContext.current, song.fileName)
-                val localUri = audioPlayerViewModel.getDownloadedFileUri(LocalContext.current, song.fileName)
+                val localUri =
+                    audioPlayerViewModel.getDownloadedFileUri(LocalContext.current, song.fileName)
 
                 if (localUri != null) {
                     // Use the local URI for your ExoPlayer or other components here
                     audioPlayerViewModel.initExoPlayer(localUri)
                 } else {
-                        // Handle the case where the file is marked as downloaded but the URI is null
+                    // Handle the case where the file is marked as downloaded but the URI is null
                     Log.e("EXO", "Local URI is null for downloaded file: ${song.fileName}")
                 }
-            }else{
+            } else {
                 audioPlayerViewModel.loadFileFromFirebase(
                     callback = { uri ->
                         // Use the URI for your ExoPlayer or other components here

@@ -42,7 +42,11 @@ import com.player.ui.theme.gradientBrush
 import com.player.viewmodel.AddMusicViewModel
 
 @Composable
-fun AddMusicPage(navController: NavController, viewModel: AddMusicViewModel, audioPlayerViewModel: MediaPlayerViewModel) {
+fun AddMusicPage(
+    navController: NavController,
+    viewModel: AddMusicViewModel,
+    audioPlayerViewModel: MediaPlayerViewModel
+) {
     val selectedGenre = viewModel.getSelectedGenreName()
     val favoriteSongIds by viewModel.favoriteSongIds
     val downloadedSongIds by viewModel.downloadedSongIds
@@ -174,7 +178,7 @@ fun AddMusicPage(navController: NavController, viewModel: AddMusicViewModel, aud
                                     },
                                     onDownloadClicked = {
                                         // Handle download button click
-                                        viewModel.scheduleSongDownload(song.songID, song.fileName)
+                                        //viewModel.scheduleSongDownload(song.songID, song.fileName)
                                     },
                                     audioPlayerViewModel,
                                     viewModel

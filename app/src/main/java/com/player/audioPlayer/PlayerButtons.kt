@@ -68,12 +68,12 @@ fun PlayerButtons(
                 .semantics { role = Role.Button }
                 .clickable {
                     if (isPlaying.value == false) {
-                        Log.d("EXO","playing")
+                        Log.d("EXO", "playing")
                         viewModel.play()
 
                     } else {
                         viewModel.pause()
-                        Log.d("EXO","pausing")
+                        Log.d("EXO", "pausing")
                     }
                 }
         )

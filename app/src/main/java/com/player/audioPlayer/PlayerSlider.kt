@@ -19,7 +19,9 @@ fun PlayerSlider(viewModel: MediaPlayerViewModel) {
     val currentMinutes = viewModel.currentMinutes.observeAsState()
 
     Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
     ) {
         Slider(
             value = currentMinutes.value!!.toFloat(),
