@@ -12,11 +12,14 @@ import androidx.lifecycle.viewModelScope
 import com.player.repository.MusicRepository
 import com.player.roomdb.Category
 import com.player.roomdb.OnlineSong
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class AddMusicViewModel(
+@HiltViewModel
+class AddMusicViewModel @Inject constructor(
     private val musicRepository: MusicRepository
 ) : ViewModel() {
 

@@ -18,11 +18,15 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MediaPlayerViewModel(
-    @SuppressLint("StaticFieldLeak") private val applicationContext: Context,
+@HiltViewModel
+class MediaPlayerViewModel @Inject constructor(
+    @SuppressLint("StaticFieldLeak") @ApplicationContext private val applicationContext: Context,
     private val storage: FirebaseStorage
 ) : ViewModel() {
     companion object {
