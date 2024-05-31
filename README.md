@@ -5,6 +5,7 @@ FEATURES: <br /> <br />
 + Audio player implemented with ExoPlayer Library <br /> <br />
 + Saving favorites locally with Room DB <br /> <br />
 + UI elements with Jetpack Compose <br /> <br />
++ Dependency injection with Dagger-Hilt <br /> <br />
 + Download feature is not finished <br /> <br />
   
 
