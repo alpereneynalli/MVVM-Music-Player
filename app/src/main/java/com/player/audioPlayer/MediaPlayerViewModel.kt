@@ -45,6 +45,9 @@ class MediaPlayerViewModel @Inject constructor(
     private val _duration = MutableLiveData(0L)
     val duration: LiveData<Long> get() = _duration
 
+    private val _currentPlayingSongId = MutableLiveData<Int?>(null)
+    val currentPlayingSongId: LiveData<Int?> get() = _currentPlayingSongId
+
     private var _exoPlayer: ExoPlayer? = null
     val exoPlayer: ExoPlayer
         get() = _exoPlayer ?: throw IllegalStateException("ExoPlayer is not initialized")
@@ -67,6 +70,16 @@ class MediaPlayerViewModel @Inject constructor(
                 delay(UPDATE_INTERVAL_MS)
             }
         }
+    }
+
+    fun setPlayingSongId(songId: Int) {
+        _currentPlayingSongId.value = songId
+    }
+
+    fun stopPlaying() {
+        _exoPlayer?.stop()
+        _isPlaying.value = false
+        _currentPlayingSongId.value = null
     }
 
     fun seekTo(position: Int) {

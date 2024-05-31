@@ -52,6 +52,7 @@ import com.player.audioPlayer.PlayerSlider
 import com.player.roomdb.OnlineSong
 import com.player.ui.theme.gradientCombinations
 import com.player.ui.theme.montserratFont
+import com.player.ui.theme.selectedCategoryColor
 import com.player.viewmodel.AddMusicViewModel
 import kotlin.random.Random
 
@@ -73,7 +74,8 @@ fun SongListItem(
     val downloadProgress by addMusicViewModel.downloadProgress.observeAsState(0)
     val context = LocalContext.current
 
-    val currentPlayingSongId = remember { mutableStateOf<Int?>(null) }
+    val currentPlayingSongId by audioPlayerViewModel.currentPlayingSongId.observeAsState()
+    val isCurrentSongPlaying = currentPlayingSongId == song.songID
 
     Log.d("SongListItem", "Download Progress: $downloadProgress")
 
@@ -88,7 +90,34 @@ fun SongListItem(
                 .fillMaxWidth()
                 .padding(2.dp)
                 .clickable {
-                    onItemClicked(if (isExpanded) -1 else song.songID)
+                    if (!isExpanded) {
+                        onItemClicked(song.songID)
+                        audioPlayerViewModel.stopPlaying()
+                        if (isDownloaded) {
+                            audioPlayerViewModel.triggerMediaScan(context, song.fileName)
+                            val localUri = audioPlayerViewModel.getDownloadedFileUri(context, song.fileName)
+                            if (localUri != null) {
+                                audioPlayerViewModel.initExoPlayer(localUri)
+                                audioPlayerViewModel.play()
+                                audioPlayerViewModel.setPlayingSongId(song.songID)
+                            }
+                        } else {
+                            audioPlayerViewModel.loadFileFromFirebase(
+                                callback = { uri ->
+                                    audioPlayerViewModel.initExoPlayer(uri)
+                                    audioPlayerViewModel.play()
+                                    audioPlayerViewModel.setPlayingSongId(song.songID)
+                                },
+                                errorCallback = { errorMessage ->
+                                    Log.d("EXO", errorMessage)
+                                },
+                                song.fileName
+                            )
+                        }
+                    } else {
+                        onItemClicked(-1)
+                        audioPlayerViewModel.stopPlaying()
+                    }
                 }
         ) {
             Row(
@@ -117,32 +146,32 @@ fun SongListItem(
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Box(modifier = Modifier.weight(1f)) {
-                Column {
-                    Text(
-                        text = song.songName,
-                        color = Color.White,
-                        fontFamily = montserratFont,
-                        fontWeight = FontWeight.W500,
-                        fontSize = 12.sp
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = song.musician,
-                        color = Color.White,
-                        fontFamily = montserratFont,
-                        fontWeight = FontWeight.W300,
-                        fontSize = 10.sp
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = song.duration,
-                        color = Color.White,
-                        fontFamily = montserratFont,
-                        fontWeight = FontWeight.W300,
-                        fontSize = 10.sp
-                    )
+                    Column {
+                        Text(
+                            text = song.songName,
+                            color = if (currentPlayingSongId == song.songID) selectedCategoryColor else Color.White,
+                            fontFamily = montserratFont,
+                            fontWeight = FontWeight.W500,
+                            fontSize = 12.sp
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = song.musician,
+                            color = Color.White,
+                            fontFamily = montserratFont,
+                            fontWeight = FontWeight.W300,
+                            fontSize = 10.sp
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = song.duration,
+                            color = Color.White,
+                            fontFamily = montserratFont,
+                            fontWeight = FontWeight.W300,
+                            fontSize = 10.sp
+                        )
+                    }
                 }
-            }
                 Spacer(modifier = Modifier.width(16.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -186,32 +215,11 @@ fun SongListItem(
         if (isExpanded) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            LaunchedEffect(song.songID, isDownloaded) {
-                if (currentPlayingSongId.value != song.songID) {
-                    if (isDownloaded) {
-                        audioPlayerViewModel.triggerMediaScan(context, song.fileName)
-                        val localUri = audioPlayerViewModel.getDownloadedFileUri(context, song.fileName)
-                        if (localUri != null) {
-                            audioPlayerViewModel.initExoPlayer(localUri)
-                        }
-                    } else {
-                        audioPlayerViewModel.loadFileFromFirebase(
-                            callback = { uri ->
-                                audioPlayerViewModel.initExoPlayer(uri)
-                            },
-                            errorCallback = { errorMessage ->
-                                Log.d("EXO", errorMessage)
-                            },
-                            song.fileName
-                        )
-                    }
-                    currentPlayingSongId.value = song.songID
+            if (isCurrentSongPlaying) {
+                Column {
+                    PlayerSlider(audioPlayerViewModel)
+                    PlayerButtons(audioPlayerViewModel)
                 }
-            }
-
-            Column {
-                PlayerSlider(audioPlayerViewModel)
-                PlayerButtons(audioPlayerViewModel)
             }
         }
     }
