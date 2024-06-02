@@ -1,4 +1,4 @@
-package com.player.viewmodel
+package com.player.utils
 
 import android.content.Context
 import android.os.Environment

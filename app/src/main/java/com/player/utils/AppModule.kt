@@ -1,4 +1,4 @@
-package com.player
+package com.player.utils
 
 import android.content.Context
 import com.google.firebase.storage.FirebaseStorage
