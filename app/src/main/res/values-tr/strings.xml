@@ -2,9 +2,9 @@
 <resources>
     <string name="LANGUAGE">Dil</string>
     <string name="AUDIO_PLAYER">Audio Player</string>
-    <string name="SEARCH_MUSIC" />
-    <string name="FAVORITES" />
-    <string name="DOWNLOADED" />
-    <string name="SOUND_EFFECTS" />
-    <string name="MY_FILES" />
+    <string name="SEARCH_MUSIC">Müzik ara</string>
+    <string name="FAVORITES">Favoriler</string>
+    <string name="DOWNLOADED">İndirilenler</string>
+    <string name="SOUND_EFFECTS">Ses Efektleri</string>
+    <string name="MY_FILES">Dosyalarım</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.player.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -13,9 +14,9 @@ import com.player.viewmodel.AddMusicViewModel
 @Composable
 fun SetupNavGraph(
     navController: NavHostController,
-    viewModel: AddMusicViewModel,
-    audioPlayerViewModel: MediaPlayerViewModel
 ) {
+    val viewModel: AddMusicViewModel = hiltViewModel()
+    val audioPlayerViewModel: MediaPlayerViewModel = hiltViewModel()
     NavHost(
         navController = navController,
         startDestination = Screen.AddMusicPage.route

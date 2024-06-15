@@ -15,21 +15,14 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val addMusicViewModel: AddMusicViewModel by viewModels()
-    private val audioPlayerViewModel: MediaPlayerViewModel by viewModels()
-    private lateinit var navController: NavHostController
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             AddMusicPageTheme {
-                navController = rememberNavController()
+                val navController = rememberNavController()
                 SetupNavGraph(
-                    navController = navController,
-                    viewModel = addMusicViewModel,
-                    audioPlayerViewModel = audioPlayerViewModel
+                    navController = navController
                 )
             }
         }
