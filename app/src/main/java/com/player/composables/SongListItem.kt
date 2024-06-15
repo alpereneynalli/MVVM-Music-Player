@@ -46,7 +46,7 @@ import com.player.R
 import com.player.audioPlayer.MediaPlayerViewModel
 import com.player.audioPlayer.PlayerButtons
 import com.player.audioPlayer.PlayerSlider
-import com.player.roomdb.OnlineSong
+import com.player.model.OnlineSong
 import com.player.ui.theme.gradientCombinations
 import com.player.ui.theme.montserratFont
 import com.player.ui.theme.selectedCategoryColor

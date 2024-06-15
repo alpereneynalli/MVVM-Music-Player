@@ -1,4 +1,4 @@
-package com.player.roomdb
+package com.player.model
 
 import com.player.R
 

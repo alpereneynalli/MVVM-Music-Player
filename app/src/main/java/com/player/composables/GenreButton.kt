@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.player.roomdb.categoryPictureMap
+import com.player.model.categoryPictureMap
 import com.player.ui.theme.montserratFont
 import com.player.ui.theme.selectedCategoryColor
 import com.player.viewmodel.AddMusicViewModel

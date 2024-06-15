@@ -4,6 +4,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.player.roomdb.dao.DownloadedSongDao
+import com.player.roomdb.dao.FavoriteSongDao
+import com.player.roomdb.entity.DownloadedSongEntity
+import com.player.roomdb.entity.FavoriteSongEntity
 
 @Database(
     entities = [FavoriteSongEntity::class, DownloadedSongEntity::class],

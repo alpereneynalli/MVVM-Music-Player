@@ -10,8 +10,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.player.repository.MusicRepository
-import com.player.roomdb.Category
-import com.player.roomdb.OnlineSong
+import com.player.model.Category
+import com.player.model.OnlineSong
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

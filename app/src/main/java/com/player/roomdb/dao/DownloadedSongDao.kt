@@ -1,9 +1,10 @@
-package com.player.roomdb
+package com.player.roomdb.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.player.roomdb.entity.DownloadedSongEntity
 
 
 @Dao

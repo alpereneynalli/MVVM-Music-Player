@@ -1,4 +1,4 @@
-package com.player.roomdb
+package com.player.model
 
 data class OnlineSong(
     val category: String,
