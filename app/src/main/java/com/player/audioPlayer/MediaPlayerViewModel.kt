@@ -18,22 +18,27 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.player.utils.CoroutinesDispatchers
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class MediaPlayerViewModel @Inject constructor(
     @SuppressLint("StaticFieldLeak") @ApplicationContext private val applicationContext: Context,
-    private val storage: FirebaseStorage
+    private val storage: FirebaseStorage,
+    private val dispatchers: CoroutinesDispatchers
 ) : ViewModel() {
     companion object {
-        private const val TAG = "MediaPlayerViewModel"
-        private const val UPDATE_INTERVAL_MS = 50L
-        private const val PLAYBACK_STATE_READY = 3
-        private const val PLAYBACK_STATE_ENDED = 4
+        internal const val TAG = "MediaPlayerViewModel"
+        internal const val UPDATE_INTERVAL_MS = 50L
+        internal const val PLAYBACK_STATE_READY = 3
+        internal const val PLAYBACK_STATE_ENDED = 4
     }
 
     private val _currentMinutes = MutableLiveData(0)
@@ -59,11 +64,12 @@ class MediaPlayerViewModel @Inject constructor(
         startUpdatingProgress()
     }
 
-    private fun startUpdatingProgress() {
-        viewModelScope.launch {
+    fun startUpdatingProgress(dispatcher: CoroutineDispatcher = Dispatchers.Main) {
+        viewModelScope.launch(dispatchers.main) {
             while (true) {
                 _exoPlayer?.currentPosition?.toInt()?.let {
                     if (it != _currentMinutes.value) {
+                        Log.d(TAG, "currentPosition: $it")
                         _currentMinutes.value = it
                     }
                 }
@@ -78,8 +84,8 @@ class MediaPlayerViewModel @Inject constructor(
 
     fun stopPlaying() {
         _exoPlayer?.stop()
-        _isPlaying.value = false
-        _currentPlayingSongId.value = null
+        _isPlaying.postValue(false)
+        _currentPlayingSongId.postValue(null)
     }
 
     fun seekTo(position: Int) {
@@ -223,5 +229,9 @@ class MediaPlayerViewModel @Inject constructor(
             Log.i("MediaScanner", "Scanned $path:")
             Log.i("MediaScanner", "-> uri=$uri")
         }
+    }
+
+    fun setExoPlayerForTesting(exoPlayer: ExoPlayer) {
+        _exoPlayer = exoPlayer
     }
 }

@@ -2,7 +2,16 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="MediaPlayerViewModelTest">
+        <State />
+      </entry>
       <entry key="app">
+        <State />
+      </entry>
+      <entry key="currentMinutes gets updated over time()">
+        <State />
+      </entry>
+      <entry key="stopPlaying calls stop on ExoPlayer()">
         <State />
       </entry>
     </value>
