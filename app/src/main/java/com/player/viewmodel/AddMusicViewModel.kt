@@ -44,49 +44,34 @@ class AddMusicViewModel @Inject constructor(
 
     private suspend fun loadSongDataFromFirebase() {
         val result = musicRepository.loadSongDataFromFirebase()
-        if (result.isSuccess) {
-            Log.d("FIRE", "Success load from firebase")
-            val songListsByCategory = musicRepository.getSongListsByCategory()
-            Log.d("FIRE", "Fetched categories: ${songListsByCategory.keys}")
+        onFirebaseDataLoaded()
+    }
 
-            // Initialize genres
-            if (songListsByCategory.isNotEmpty()) {
-                selectedGenre = songListsByCategory.keys.first()
-                Log.d("FIRE", "Default selected genre: $selectedGenre")
-            }
+    private suspend fun onFirebaseDataLoaded() {
+        val categoryList = musicRepository.getCategoryList()
+        val songListsByCategory = musicRepository.getSongListsByCategory()
+        initializeGenres(categoryList, songListsByCategory)
 
-            // Initialize the first and second row genres
-            val songCategoryList = musicRepository.getCategoryList()
-            if (songCategoryList.size < 8) {
-                val firstRowLimit = 4
-                firstRowGenres = songCategoryList.take(firstRowLimit)
-                secondRowGenres = songCategoryList.drop(firstRowLimit)
-            } else {
-                val firstRowLimit = songCategoryList.size / 2
-                firstRowGenres = songCategoryList.take(firstRowLimit)
-                secondRowGenres = songCategoryList.drop(firstRowLimit)
-            }
+        val favoriteSongIds = musicRepository.getFavoriteSongIds()
+        val downloadedSongIds = musicRepository.getDownloadedSongIds()
 
+        withContext(Dispatchers.Main) {
+            _favoriteSongIds.value = favoriteSongIds.toMutableSet()
+            _downloadedSongIds.value = downloadedSongIds.toMutableSet()
+        }
+    }
+
+    private fun initializeGenres(categories: List<Category>, songListsByCategory: Map<String, List<OnlineSong>>) {
+        if (categories.isNotEmpty()) {
+            firstRowGenres = categories.subList(0, categories.size / 2)
+            secondRowGenres = categories.subList(categories.size / 2, categories.size)
+            selectedGenre = categories.first().category
             updateSelectedGenreSongs(songListsByCategory)
-
-            viewModelScope.launch(Dispatchers.IO) {
-                val favoriteSongIds = musicRepository.getFavoriteSongIds()
-                val downloadedSongIds = musicRepository.getDownloadedSongIds()
-
-                withContext(Dispatchers.Main) {
-                    _favoriteSongIds.value = favoriteSongIds.toMutableSet()
-                    _downloadedSongIds.value = downloadedSongIds.toMutableSet()
-                }
-            }
-        } else {
-            Log.d("FIRE", "Error downloading JSON file: ${result.exceptionOrNull()?.message}")
         }
     }
 
     private fun updateSelectedGenreSongs(songListsByCategory: Map<String, List<OnlineSong>>) {
-        Log.d("FIRE", "Updating selected genre songs for genre: $selectedGenre")
         selectedGenreSongs = songListsByCategory[selectedGenre] ?: emptyList()
-        Log.d("FIRE", "Selected genre songs: $selectedGenreSongs")
     }
 
     fun toggleDownloadedSong(songId: Int) {
