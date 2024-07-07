@@ -1,13 +1,13 @@
-package com.player.roomdb
+package com.player.data.roomdb
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.player.roomdb.dao.DownloadedSongDao
-import com.player.roomdb.dao.FavoriteSongDao
-import com.player.roomdb.entity.DownloadedSongEntity
-import com.player.roomdb.entity.FavoriteSongEntity
+import com.player.data.roomdb.dao.DownloadedSongDao
+import com.player.data.roomdb.dao.FavoriteSongDao
+import com.player.data.roomdb.entity.DownloadedSongEntity
+import com.player.data.roomdb.entity.FavoriteSongEntity
 
 @Database(
     entities = [FavoriteSongEntity::class, DownloadedSongEntity::class],

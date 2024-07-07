@@ -2,8 +2,8 @@ package com.player.di
 
 import android.content.Context
 import com.google.firebase.storage.FirebaseStorage
-import com.player.repository.MusicRepository
-import com.player.roomdb.AppDatabase
+import com.player.data.repository.MusicRepository
+import com.player.data.roomdb.AppDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

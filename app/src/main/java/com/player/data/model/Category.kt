@@ -1,4 +1,4 @@
-package com.player.model
+package com.player.data.model
 
 import com.player.R
 

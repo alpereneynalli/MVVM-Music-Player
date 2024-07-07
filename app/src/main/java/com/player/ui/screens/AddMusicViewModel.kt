@@ -1,6 +1,5 @@
-package com.player.viewmodel
+package com.player.ui.screens
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,10 +8,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.media3.exoplayer.ExoPlayer
-import com.player.repository.MusicRepository
-import com.player.model.Category
-import com.player.model.OnlineSong
+import com.player.data.repository.MusicRepository
+import com.player.data.model.Category
+import com.player.data.model.OnlineSong
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

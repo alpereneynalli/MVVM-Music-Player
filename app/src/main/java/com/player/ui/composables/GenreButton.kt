@@ -1,4 +1,4 @@
-package com.player.composables
+package com.player.ui.composables
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,10 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.player.model.categoryPictureMap
+import com.player.data.model.categoryPictureMap
 import com.player.ui.theme.montserratFont
 import com.player.ui.theme.selectedCategoryColor
-import com.player.viewmodel.AddMusicViewModel
+import com.player.ui.screens.AddMusicViewModel
 
 @Composable
 fun SquareButtonWithImage(

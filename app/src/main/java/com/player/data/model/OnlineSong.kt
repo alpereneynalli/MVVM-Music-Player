@@ -1,4 +1,4 @@
-package com.player.model
+package com.player.data.model
 
 data class OnlineSong(
     val category: String,

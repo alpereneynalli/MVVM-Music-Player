@@ -1,10 +1,10 @@
-package com.player.roomdb.dao
+package com.player.data.roomdb.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.player.roomdb.entity.FavoriteSongEntity
+import com.player.data.roomdb.entity.FavoriteSongEntity
 
 @Dao
 interface FavoriteSongDao {

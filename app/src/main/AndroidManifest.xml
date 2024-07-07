@@ -31,7 +31,7 @@
             tools:node="remove" />
 
         <activity
-            android:name="com.player.MainActivity"
+            android:name="com.player.ui.MainActivity"
             android:exported="true"
             android:label="@string/AUDIO_PLAYER"
             android:theme="@style/Theme.AudioPlayer">

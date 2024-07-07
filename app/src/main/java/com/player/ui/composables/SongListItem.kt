@@ -1,4 +1,4 @@
-package com.player.composables
+package com.player.ui.composables
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -29,12 +29,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -46,12 +43,11 @@ import com.player.R
 import com.player.audioPlayer.MediaPlayerViewModel
 import com.player.audioPlayer.PlayerButtons
 import com.player.audioPlayer.PlayerSlider
-import com.player.model.OnlineSong
-import com.player.ui.theme.gradientCombinations
+import com.player.data.model.OnlineSong
+import com.player.ui.theme.buttonColor
 import com.player.ui.theme.montserratFont
 import com.player.ui.theme.selectedCategoryColor
-import com.player.viewmodel.AddMusicViewModel
-import kotlin.random.Random
+import com.player.ui.screens.AddMusicViewModel
 
 @Composable
 fun SongListItem(
@@ -66,8 +62,6 @@ fun SongListItem(
     addMusicViewModel: AddMusicViewModel
 ) {
     val isExpanded = expandedItemId == song.songID
-    val randomIndex = remember { Random.nextInt(0, gradientCombinations.size) }
-    val selectedCombination = gradientCombinations[randomIndex]
     val downloadProgress by addMusicViewModel.downloadProgress.observeAsState(0)
     val context = LocalContext.current
 
@@ -131,13 +125,7 @@ fun SongListItem(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(24.dp))
-                        .background(
-                            Brush.linearGradient(
-                                selectedCombination.colors,
-                                start = Offset(50f, 0f),
-                                end = Offset(50f, 100f)
-                            )
-                        )
+                        .background(color = buttonColor)
                         .padding(12.dp)
                         .clip(CircleShape),
                     alignment = Alignment.Center

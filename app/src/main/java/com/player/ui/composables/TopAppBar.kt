@@ -1,4 +1,4 @@
-package com.player.composables
+package com.player.ui.composables
 
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton

@@ -1,4 +1,4 @@
-package com.player.composables
+package com.player.ui.composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

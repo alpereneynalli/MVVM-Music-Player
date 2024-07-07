@@ -6,10 +6,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.player.audioPlayer.MediaPlayerViewModel
-import com.player.pages.AddMusicPage
-import com.player.pages.DownloadedFilesPage
-import com.player.pages.FavoritesPage
-import com.player.viewmodel.AddMusicViewModel
+import com.player.ui.screens.AddMusicPage
+import com.player.ui.screens.DownloadedFilesPage
+import com.player.ui.screens.FavoritesPage
+import com.player.ui.screens.AddMusicViewModel
 
 @Composable
 fun SetupNavGraph(

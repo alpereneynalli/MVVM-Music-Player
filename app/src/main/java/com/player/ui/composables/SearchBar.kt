@@ -1,4 +1,4 @@
-package com.player.composables
+package com.player.ui.composables
 
 import androidx.compose.foundation.clickable
 import androidx.compose.material.Icon

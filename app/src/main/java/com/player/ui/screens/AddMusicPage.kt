@@ -1,4 +1,4 @@
-package com.player.pages
+package com.player.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -31,15 +31,14 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.player.R
 import com.player.audioPlayer.MediaPlayerViewModel
-import com.player.composables.IconButtonWithText
-import com.player.composables.SearchBar
-import com.player.composables.SongListItem
-import com.player.composables.SquareButtonWithImage
-import com.player.composables.TopAppBar
+import com.player.ui.composables.IconButtonWithText
+import com.player.ui.composables.SearchBar
+import com.player.ui.composables.SongListItem
+import com.player.ui.composables.SquareButtonWithImage
+import com.player.ui.composables.TopAppBar
 import com.player.navigation.Screen
 import com.player.ui.theme.buttonColor
 import com.player.ui.theme.gradientBrush
-import com.player.viewmodel.AddMusicViewModel
 
 @Composable
 fun AddMusicPage(
