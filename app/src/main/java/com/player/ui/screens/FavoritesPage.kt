@@ -27,9 +27,9 @@ import com.player.ui.theme.gradientBrush
 
 @Composable
 fun FavoritesPage(
-    navController: NavController,
     viewModel: AddMusicViewModel,
-    audioPlayerViewModel: MediaPlayerViewModel
+    audioPlayerViewModel: MediaPlayerViewModel,
+    onBackClicked: () -> Unit
 ) {
     val favoriteSongIds by viewModel.favoriteSongIds
     val downloadedSongIds by viewModel.downloadedSongIds
@@ -48,7 +48,7 @@ fun FavoritesPage(
                 topBar = {
                     TopAppBar(
                         text = stringResource(id = R.string.FAVORITES),
-                        navController
+                        onBackClicked = onBackClicked
                     )
                 },
                 content = { padding ->

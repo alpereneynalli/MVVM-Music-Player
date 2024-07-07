@@ -36,15 +36,17 @@ import com.player.ui.composables.SearchBar
 import com.player.ui.composables.SongListItem
 import com.player.ui.composables.SquareButtonWithImage
 import com.player.ui.composables.TopAppBar
-import com.player.navigation.Screen
+import com.player.ui.navigation.Screen
 import com.player.ui.theme.buttonColor
 import com.player.ui.theme.gradientBrush
 
 @Composable
 fun AddMusicPage(
-    navController: NavController,
     viewModel: AddMusicViewModel,
-    audioPlayerViewModel: MediaPlayerViewModel
+    audioPlayerViewModel: MediaPlayerViewModel,
+    onBackClicked: () -> Unit,
+    onFavoritesClicked: () -> Unit,
+    onDownloadedClicked: () -> Unit
 ) {
     val selectedGenre = viewModel.getSelectedGenreName()
     val favoriteSongIds by viewModel.favoriteSongIds
@@ -59,7 +61,7 @@ fun AddMusicPage(
         ) {
             Scaffold(
                 backgroundColor = Color.Transparent,
-                topBar = { TopAppBar(text = stringResource(R.string.AUDIO_PLAYER), navController) },
+                topBar = { TopAppBar(text = stringResource(R.string.AUDIO_PLAYER), onBackClicked) },
                 content = { padding ->
                     Column(
                         modifier = Modifier
@@ -89,7 +91,7 @@ fun AddMusicPage(
                                 icon = Icons.Default.Favorite,
                                 buttonColor,
                             ) {
-                                navController.navigate(route = Screen.Favorites.route)
+                                onFavoritesClicked()
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             IconButtonWithText(
@@ -97,7 +99,7 @@ fun AddMusicPage(
                                 icon = Icons.Default.Download,
                                 buttonColor
                             ) {
-                                navController.navigate(route = Screen.Downloaded.route)
+                                onDownloadedClicked()
                             }
                         }
                         Spacer(modifier = Modifier.height(6.dp))

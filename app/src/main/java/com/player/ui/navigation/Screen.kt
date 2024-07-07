@@ -1,4 +1,4 @@
-package com.player.navigation
+package com.player.ui.navigation
 
 sealed class Screen(val route: String) {
     object AddMusicPage : Screen(route = "AddMusicPage")

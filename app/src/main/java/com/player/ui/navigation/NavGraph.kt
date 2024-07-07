@@ -1,10 +1,11 @@
-package com.player.navigation
+package com.player.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.player.audioPlayer.MediaPlayerViewModel
 import com.player.ui.screens.AddMusicPage
 import com.player.ui.screens.DownloadedFilesPage
@@ -13,7 +14,7 @@ import com.player.ui.screens.AddMusicViewModel
 
 @Composable
 fun SetupNavGraph(
-    navController: NavHostController,
+    navController: NavHostController
 ) {
     val viewModel: AddMusicViewModel = hiltViewModel()
     val audioPlayerViewModel: MediaPlayerViewModel = hiltViewModel()
@@ -26,9 +27,17 @@ fun SetupNavGraph(
             route = Screen.AddMusicPage.route
         ) {
             AddMusicPage(
-                navController = navController,
                 viewModel = viewModel,
-                audioPlayerViewModel = audioPlayerViewModel
+                audioPlayerViewModel = audioPlayerViewModel,
+                onBackClicked = {
+                    navController.popBackStack()
+                },
+                onFavoritesClicked = {
+                    navController.navigate(Screen.Favorites.route)
+                },
+                onDownloadedClicked = {
+                    navController.navigate(Screen.Downloaded.route)
+                }
             )
         }
 
@@ -36,9 +45,11 @@ fun SetupNavGraph(
             route = Screen.Favorites.route
         ) {
             FavoritesPage(
-                navController = navController,
                 viewModel = viewModel,
-                audioPlayerViewModel = audioPlayerViewModel
+                audioPlayerViewModel = audioPlayerViewModel,
+                onBackClicked = {
+                    navController.popBackStack()
+                }
             )
         }
 
@@ -46,9 +57,11 @@ fun SetupNavGraph(
             route = Screen.Downloaded.route
         ) {
             DownloadedFilesPage(
-                navController = navController,
                 viewModel = viewModel,
-                audioPlayerViewModel = audioPlayerViewModel
+                audioPlayerViewModel = audioPlayerViewModel,
+                onBackClicked = {
+                    navController.popBackStack()
+                }
             )
         }
     }

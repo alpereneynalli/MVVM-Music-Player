@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.navigation.compose.rememberNavController
-import com.player.navigation.SetupNavGraph
+import com.player.ui.navigation.SetupNavGraph
 import com.player.ui.theme.AddMusicPageTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -16,9 +16,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             AddMusicPageTheme {
-                val navController = rememberNavController()
                 SetupNavGraph(
-                    navController = navController
+                    navController = rememberNavController()
                 )
             }
         }

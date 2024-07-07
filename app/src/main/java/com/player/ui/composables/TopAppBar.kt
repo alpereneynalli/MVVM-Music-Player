@@ -15,7 +15,7 @@ import com.player.ui.theme.montserratFont
 
 
 @Composable
-fun TopAppBar(text: String, navController: NavController) {
+fun TopAppBar(text: String, onBackClicked : () -> Unit) {
     androidx.compose.material.TopAppBar(
         title = {
             Text(
@@ -27,7 +27,7 @@ fun TopAppBar(text: String, navController: NavController) {
             )
         },
         navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
+            IconButton(onClick = onBackClicked) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = null,
