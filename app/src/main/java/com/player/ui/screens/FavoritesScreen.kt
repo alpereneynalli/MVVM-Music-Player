@@ -12,15 +12,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.player.R
 import com.player.ui.audioPlayer.MediaPlayerViewModel
-import com.player.ui.composables.SongListItem
+import com.player.ui.audioPlayer.SongListItem
 import com.player.ui.composables.TopAppBar
 import com.player.ui.theme.gradientBrush
 
@@ -31,7 +34,17 @@ fun FavoritesPage(
     audioPlayerViewModel: MediaPlayerViewModel,
     onBackClicked: () -> Unit
 ) {
-    val favoriteSongIds = viewModel.favoriteSongIds.observeAsState()
+    val songList by viewModel.allSongs.observeAsState(initial = emptyList())
+    val favoriteSongIds by viewModel.favoriteSongIds.observeAsState()
+    val favoriteSongs = remember(songList, favoriteSongIds) {
+        derivedStateOf {
+            songList.filter { favoriteSongIds?.contains(it.songID) == true }
+        }
+    }
+    LaunchedEffect (Unit) {
+        viewModel.getSongList()
+    }
+
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -57,36 +70,20 @@ fun FavoritesPage(
                             .padding(4.dp)
                     ) {
                         Spacer(modifier = Modifier.height(2.dp))
-                        /*
+
                         LazyColumn {
-                            items(
-                                viewModel.getSongListsByCategory()
-                                    .filter { song ->
-                                        song.songID in favoriteSongIds
-                                    }
-                            ) { favoriteSong ->
+                            items(favoriteSongs.value) { favoriteSong ->
                                 SongListItem(
                                     song = favoriteSong,
-                                    isFavorite = favoriteSong.songID in favoriteSongIds,
-                                    isDownloaded = favoriteSong.songID in downloadedSongIds,
                                     onFavoriteToggle = {
                                         viewModel.toggleFavorite(favoriteSong.songID)
                                     },
-                                    expandedItemId = viewModel.currentExpandedItemId,
-                                    onItemClicked = { itemId ->
-                                        viewModel.currentExpandedItemId = itemId
-                                    },
-                                    onDownloadClicked = {
-                                        // Handle download button click
-                                        //viewModel.scheduleSongDownload(favoriteSong.songID, favoriteSong.fileName)
-                                    },
-                                    audioPlayerViewModel,
-                                    viewModel
+                                    isFavorite = true,
+                                    audioPlayerViewModel = audioPlayerViewModel,
                                 )
                             }
                         }
 
-                         */
                     }
                 }
             )

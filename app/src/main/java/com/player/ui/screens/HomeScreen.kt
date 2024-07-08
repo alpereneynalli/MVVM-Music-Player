@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.SurroundSound
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -33,7 +35,7 @@ import com.player.R
 import com.player.ui.audioPlayer.MediaPlayerViewModel
 import com.player.ui.composables.IconButtonWithText
 import com.player.ui.composables.SearchBar
-import com.player.ui.composables.SongListItem
+import com.player.ui.audioPlayer.SongListItem
 import com.player.ui.composables.SquareButtonWithImage
 import com.player.ui.composables.TopAppBar
 import com.player.ui.theme.buttonColor
@@ -47,12 +49,17 @@ fun HomeScreen(
     onFavoritesClicked: () -> Unit,
     onDownloadedClicked: () -> Unit
 ) {
+    val screenState by viewModel.screenState.observeAsState()
     val firstRowGenres by viewModel.firstRowGenres.observeAsState(initial = emptyList())
     val secondRowGenres by viewModel.secondRowGenres.observeAsState(initial = emptyList())
     val selectedGenre by viewModel.selectedGenre.observeAsState()
     val selectedGenreSongs by viewModel.selectedGenreSongs.observeAsState(initial = emptyList())
     val favoriteSongIds by viewModel.favoriteSongIds.observeAsState()
-    val currentExpandedItemId by viewModel.currentExpandedItemId.observeAsState(initial = -1)
+
+    LaunchedEffect (Unit){
+        viewModel.initPage()
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -127,58 +134,68 @@ fun HomeScreen(
                         }
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        LazyRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(firstRowGenres) { genre ->
-                                SquareButtonWithImage(
-                                    text = genre.category,
-                                    categoryName = genre.category,
-                                    selected = selectedGenre == genre.category,
-                                    onClick = { /* Handle genre button click */ },
-                                    onSelected = { viewModel.setSelectedGenreName(genre.category) },
-                                    viewModel
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        if (secondRowGenres.isNotEmpty()) {
-                            LazyRow(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 16.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                items(secondRowGenres) { genre ->
-                                    SquareButtonWithImage(
-                                        text = genre.category,
-                                        categoryName = genre.category,
-                                        selected = selectedGenre == genre.category,
-                                        onClick = { /* Handle genre button click */ },
-                                        onSelected = { viewModel.setSelectedGenreName(genre.category) },
-                                        viewModel
-                                    )
+                        when (screenState) {
+                            ScreenState.Loading -> {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator()
                                 }
                             }
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
+                            ScreenState.Loaded -> {
+                                LazyRow(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    items(firstRowGenres) { genre ->
+                                        SquareButtonWithImage(
+                                            text = genre.category,
+                                            categoryName = genre.category,
+                                            selected = selectedGenre == genre.category,
+                                            onClick = { /* Handle genre button click */ },
+                                            onSelected = { viewModel.setSelectedGenreName(genre.category) },
+                                            viewModel
+                                        )
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                if (secondRowGenres.isNotEmpty()) {
+                                    LazyRow(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 16.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        items(secondRowGenres) { genre ->
+                                            SquareButtonWithImage(
+                                                text = genre.category,
+                                                categoryName = genre.category,
+                                                selected = selectedGenre == genre.category,
+                                                onClick = { /* Handle genre button click */ },
+                                                onSelected = { viewModel.setSelectedGenreName(genre.category) },
+                                                viewModel
+                                            )
+                                        }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
 
-                        LazyColumn {
-                            items(selectedGenreSongs) { song ->
-                                SongListItem(
-                                    song = song,
-                                    isFavorite = false,
-                                    onFavoriteToggle = {
-                                        viewModel.toggleFavorite(song.songID)
-                                    },
-                                    audioPlayerViewModel = audioPlayerViewModel,
-                                )
+                                LazyColumn {
+                                    items(selectedGenreSongs) { song ->
+                                        SongListItem(
+                                            song = song,
+                                            isFavorite = favoriteSongIds?.contains(song.songID) == true ,
+                                            onFavoriteToggle = {
+                                                viewModel.toggleFavorite(song.songID)
+                                            },
+                                            audioPlayerViewModel = audioPlayerViewModel,
+                                        )
+                                    }
+                                }
                             }
+                            ScreenState.Error -> TODO()
+                            null -> TODO()
                         }
-
                     }
                 }
             )

@@ -1,9 +1,5 @@
 package com.player.ui.screens
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,6 +18,8 @@ class MainViewModel @Inject constructor(
     private val musicRepository: MusicRepository
 ) : ViewModel() {
 
+    private val _screenState = MutableLiveData<ScreenState>(ScreenState.Loading)
+    val screenState: LiveData<ScreenState> = _screenState
 
     private val _firstRowGenres = MutableLiveData<List<Category>>()
     val firstRowGenres: LiveData<List<Category>> = _firstRowGenres
@@ -35,15 +33,21 @@ class MainViewModel @Inject constructor(
     private val _selectedGenreSongs = MutableLiveData<List<OnlineSong>>(emptyList())
     val selectedGenreSongs: LiveData<List<OnlineSong>> = _selectedGenreSongs
 
+    private val _allSongs = MutableLiveData<List<OnlineSong>>(emptyList())
+    val allSongs: LiveData<List<OnlineSong>> = _allSongs
+
     private val _currentExpandedItemId = MutableLiveData(-1)
     val currentExpandedItemId: LiveData<Int> = _currentExpandedItemId
 
     private val _favoriteSongIds = MutableLiveData<Set<Int>>(emptySet())
     val favoriteSongIds: LiveData<Set<Int>> = _favoriteSongIds
 
-    init {
+
+    fun initPage(){
         viewModelScope.launch {
+            _screenState.value = ScreenState.Loading
             loadSongDataFromFirebase()
+            _screenState.value = ScreenState.Loaded
         }
     }
 
@@ -58,7 +62,6 @@ class MainViewModel @Inject constructor(
         initializeGenres(categoryList, songListsByCategory)
 
         val favoriteSongIds = musicRepository.getFavoriteSongIds()
-        val downloadedSongIds = musicRepository.getDownloadedSongIds()
 
         withContext(Dispatchers.Main) {
             _favoriteSongIds.value = favoriteSongIds.toMutableSet()
@@ -81,21 +84,12 @@ class MainViewModel @Inject constructor(
         _selectedGenreSongs.value = songListsByCategory[_selectedGenre.value] ?: emptyList()
     }
 
-    fun toggleDownloadedSong(songId: Int) {
-        viewModelScope.launch {
-            musicRepository.toggleDownloadedSong(songId)
-        }
-    }
 
     fun toggleFavorite(songId: Int) {
         viewModelScope.launch {
             musicRepository.toggleFavoriteSong(songId)
             _favoriteSongIds.value = musicRepository.getFavoriteSongIds().toMutableSet()
         }
-    }
-
-    fun getSelectedGenreName(): String? {
-        return _selectedGenre.value
     }
 
     fun setSelectedGenreName(genre: String) {
@@ -106,12 +100,11 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun setExpandedItemId(itemId: Int) {
-        _currentExpandedItemId.value = itemId
-    }
-
-    fun getSongListsByCategory(): List<OnlineSong> {
-        return musicRepository.getSongListsByCategory().flatMap { it.value }
+    fun getSongList() {
+        viewModelScope.launch {
+            val songListsByCategory = musicRepository.getSongListsByCategory().flatMap { it.value }
+            _allSongs.value = songListsByCategory
+        }
     }
 
 }

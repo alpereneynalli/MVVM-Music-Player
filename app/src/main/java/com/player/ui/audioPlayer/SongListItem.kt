@@ -1,6 +1,5 @@
-package com.player.ui.composables
+package com.player.ui.audioPlayer
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -24,14 +22,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,12 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.player.R
 import com.player.data.model.OnlineSong
-import com.player.ui.audioPlayer.MediaPlayerViewModel
-import com.player.ui.audioPlayer.PlayerButtons
-import com.player.ui.audioPlayer.PlayerSlider
-import com.player.ui.audioPlayer.SongExpansionState
-import com.player.ui.audioPlayer.SongState
-import com.player.ui.screens.MainViewModel
 import com.player.ui.theme.buttonColor
 import com.player.ui.theme.montserratFont
 import com.player.ui.theme.selectedCategoryColor
@@ -162,7 +152,7 @@ fun SongListItemPreview() {
         duration = "3:30",
         category = "Banger",
         sourceURL = "https://www.example.com/song.mp3",
-        fileName = "song.mp3"
+        fileName = "song.mp3",
     )
 
     // Display the SongListItem with the dummy data
