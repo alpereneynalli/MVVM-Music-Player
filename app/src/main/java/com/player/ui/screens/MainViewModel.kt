@@ -39,7 +39,7 @@ class MainViewModel @Inject constructor(
     private val _favoriteSongIds = MutableLiveData<Set<Int>>(emptySet())
     val favoriteSongIds: LiveData<Set<Int>> = _favoriteSongIds
 
-    fun initPage(){
+    init {
         viewModelScope.launch {
             _screenState.value = ScreenState.Loading
             loadSongDataFromFirebase()
@@ -71,7 +71,9 @@ class MainViewModel @Inject constructor(
         if (categories.isNotEmpty()) {
             _firstRowGenres.value = categories.subList(0, categories.size / 2)
             _secondRowGenres.value = categories.subList(categories.size / 2, categories.size)
-            _selectedGenre.value = categories.first().category
+            if(_selectedGenre.value == null || _selectedGenre.value == ""){
+                _selectedGenre.value = categories.first().category
+            }
             updateSelectedGenreSongs(songListsByCategory)
         }
     }

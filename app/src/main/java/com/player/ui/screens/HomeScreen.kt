@@ -54,10 +54,6 @@ fun HomeScreen(
 ) {
     val screenState by viewModel.screenState.observeAsState()
 
-    LaunchedEffect (Unit){
-        viewModel.initPage()
-    }
-
     Surface(
         modifier = Modifier.fillMaxSize(),
     ) {
