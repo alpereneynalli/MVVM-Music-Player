@@ -13,7 +13,6 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -26,8 +25,6 @@ import androidx.compose.ui.unit.dp
 import com.player.R
 import com.player.ui.audioPlayer.MediaPlayerViewModel
 import com.player.ui.audioPlayer.SongListItem
-import com.player.ui.composables.GenreList
-import com.player.ui.composables.SongList
 import com.player.ui.composables.TopAppBar
 import com.player.ui.theme.gradientBrush
 import com.player.ui.theme.selectedCategoryColor
@@ -76,10 +73,14 @@ fun FavoritesPage(
 
                         when (screenState) {
                             ScreenState.Loading -> {
-                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     CircularProgressIndicator(color = selectedCategoryColor)
                                 }
                             }
+
                             ScreenState.Loaded -> {
                                 LazyColumn {
                                     items(favoriteSongs.value) { favoriteSong ->
@@ -94,6 +95,7 @@ fun FavoritesPage(
                                     }
                                 }
                             }
+
                             ScreenState.Error -> TODO()
                             null -> TODO()
                         }

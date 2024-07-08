@@ -1,13 +1,8 @@
 package com.player.ui.audioPlayer
 
 import android.annotation.SuppressLint
-import android.content.ContentUris
 import android.content.Context
-import android.media.MediaScannerConnection
 import android.net.Uri
-import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -214,22 +209,25 @@ class MediaPlayerViewModel @Inject constructor(
             }
     }
 
-    fun handleSong(song: OnlineSong){
+    fun handleSong(song: OnlineSong) {
         Log.d("EXO", "Handling song")
-        if(_currentPlayingSongId.value == song.songID){
-            when(_songExpansionState.value){
-                is SongExpansionState.Expanded -> _songExpansionState.value = SongExpansionState.Closed
-                is SongExpansionState.Closed -> _songExpansionState.value = SongExpansionState.Expanded
+        if (_currentPlayingSongId.value == song.songID) {
+            when (_songExpansionState.value) {
+                is SongExpansionState.Expanded -> _songExpansionState.value =
+                    SongExpansionState.Closed
+
+                is SongExpansionState.Closed -> _songExpansionState.value =
+                    SongExpansionState.Expanded
+
                 null -> Unit
             }
-        }
-        else{
+        } else {
             _songExpansionState.value = SongExpansionState.Closed
             playNewSong(song)
         }
     }
 
-    fun playNewSong(song: OnlineSong){
+    fun playNewSong(song: OnlineSong) {
         Log.d("EXO", "Playing new song")
         _songState.value = SongState.Loading
         stopPlaying()
@@ -244,7 +242,8 @@ class MediaPlayerViewModel @Inject constructor(
             errorCallback = {
                 _songState.value = SongState.Error
             },
-            songName = song.fileName)
+            songName = song.fileName
+        )
     }
 
     fun setExoPlayerForTesting(exoPlayer: ExoPlayer) {

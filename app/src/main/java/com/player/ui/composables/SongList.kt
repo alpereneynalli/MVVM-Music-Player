@@ -19,7 +19,7 @@ fun SongList(viewModel: MainViewModel, audioPlayerViewModel: MediaPlayerViewMode
         items(selectedGenreSongs) { song ->
             SongListItem(
                 song = song,
-                isFavorite = favoriteSongIds?.contains(song.songID) == true ,
+                isFavorite = favoriteSongIds?.contains(song.songID) == true,
                 onFavoriteToggle = {
                     viewModel.toggleFavorite(song.songID)
                 },

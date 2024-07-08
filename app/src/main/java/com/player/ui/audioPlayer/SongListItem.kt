@@ -126,7 +126,7 @@ fun SongListItem(
                 }
             }
         }
-        if (currentPlayingSongId?.value == song.songID){
+        if (currentPlayingSongId?.value == song.songID) {
             when (songExpansionState?.value) {
                 SongExpansionState.Expanded -> {
                     Spacer(modifier = Modifier.height(8.dp))
@@ -135,6 +135,7 @@ fun SongListItem(
                         PlayerButtons(audioPlayerViewModel)
                     }
                 }
+
                 else -> Unit
             }
         }
@@ -156,7 +157,7 @@ fun SongListItemPreview() {
     )
 
     // Display the SongListItem with the dummy data
-    Box(modifier = Modifier.background(Color.Black)){
+    Box(modifier = Modifier.background(Color.Black)) {
         SongListItem(
             song = song,
             isFavorite = true,

@@ -9,7 +9,6 @@ import com.player.data.model.OnlineSong
 import com.player.data.repository.MusicRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -29,7 +28,7 @@ class MainViewModel @Inject constructor(
     val secondRowGenres: LiveData<List<Category>> = _secondRowGenres
 
     private val _selectedGenre = MutableLiveData<String>("")
-    var selectedGenre : LiveData<String> = _selectedGenre
+    var selectedGenre: LiveData<String> = _selectedGenre
 
     private val _selectedGenreSongs = MutableLiveData<List<OnlineSong>>(emptyList())
     val selectedGenreSongs: LiveData<List<OnlineSong>> = _selectedGenreSongs
@@ -73,7 +72,7 @@ class MainViewModel @Inject constructor(
         if (categories.isNotEmpty()) {
             _firstRowGenres.value = categories.subList(0, categories.size / 2)
             _secondRowGenres.value = categories.subList(categories.size / 2, categories.size)
-            if(_selectedGenre.value == null || _selectedGenre.value == ""){
+            if (_selectedGenre.value == null || _selectedGenre.value == "") {
                 _selectedGenre.value = categories.first().category
             }
             updateSelectedGenreSongs(songListsByCategory)

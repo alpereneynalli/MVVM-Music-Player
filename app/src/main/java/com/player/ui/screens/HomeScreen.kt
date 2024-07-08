@@ -11,9 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -23,7 +20,6 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.SurroundSound
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -33,12 +29,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.player.R
 import com.player.ui.audioPlayer.MediaPlayerViewModel
+import com.player.ui.composables.GenreList
 import com.player.ui.composables.IconButtonWithText
 import com.player.ui.composables.SearchBar
-import com.player.ui.audioPlayer.SongListItem
-import com.player.ui.composables.GenreList
 import com.player.ui.composables.SongList
-import com.player.ui.composables.SquareButtonWithImage
 import com.player.ui.composables.TopAppBar
 import com.player.ui.theme.buttonColor
 import com.player.ui.theme.gradientBrush
@@ -130,10 +124,14 @@ fun HomeScreen(
 
                         when (screenState) {
                             ScreenState.Loading -> {
-                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
                                     CircularProgressIndicator(color = selectedCategoryColor)
                                 }
                             }
+
                             ScreenState.Loaded -> {
                                 GenreList(viewModel = viewModel)
 
@@ -144,6 +142,7 @@ fun HomeScreen(
                                     audioPlayerViewModel = audioPlayerViewModel
                                 )
                             }
+
                             ScreenState.Error -> TODO()
                             null -> TODO()
                         }
