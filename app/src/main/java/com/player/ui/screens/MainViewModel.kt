@@ -36,12 +36,8 @@ class MainViewModel @Inject constructor(
     private val _allSongs = MutableLiveData<List<OnlineSong>>(emptyList())
     val allSongs: LiveData<List<OnlineSong>> = _allSongs
 
-    private val _currentExpandedItemId = MutableLiveData(-1)
-    val currentExpandedItemId: LiveData<Int> = _currentExpandedItemId
-
     private val _favoriteSongIds = MutableLiveData<Set<Int>>(emptySet())
     val favoriteSongIds: LiveData<Set<Int>> = _favoriteSongIds
-
 
     fun initPage(){
         viewModelScope.launch {

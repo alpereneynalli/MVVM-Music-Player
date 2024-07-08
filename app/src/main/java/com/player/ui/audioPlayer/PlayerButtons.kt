@@ -26,6 +26,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.player.ui.theme.selectedCategoryColor
 
 @Composable
 fun PlayerButtons(
@@ -53,7 +54,7 @@ fun PlayerButtons(
                 }
         )
         when (songState?.value) {
-            SongState.Loading -> CircularProgressIndicator()
+            SongState.Loading -> androidx.compose.material.CircularProgressIndicator(color = selectedCategoryColor)
             else -> Image(
                 imageVector = if(songState?.value == SongState.Playing) Icons.Filled.PauseCircleFilled
                 else Icons.Filled.PlayCircleFilled,

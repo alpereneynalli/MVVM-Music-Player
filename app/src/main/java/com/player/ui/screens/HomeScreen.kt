@@ -36,10 +36,13 @@ import com.player.ui.audioPlayer.MediaPlayerViewModel
 import com.player.ui.composables.IconButtonWithText
 import com.player.ui.composables.SearchBar
 import com.player.ui.audioPlayer.SongListItem
+import com.player.ui.composables.GenreList
+import com.player.ui.composables.SongList
 import com.player.ui.composables.SquareButtonWithImage
 import com.player.ui.composables.TopAppBar
 import com.player.ui.theme.buttonColor
 import com.player.ui.theme.gradientBrush
+import com.player.ui.theme.selectedCategoryColor
 
 @Composable
 fun HomeScreen(
@@ -50,11 +53,6 @@ fun HomeScreen(
     onDownloadedClicked: () -> Unit
 ) {
     val screenState by viewModel.screenState.observeAsState()
-    val firstRowGenres by viewModel.firstRowGenres.observeAsState(initial = emptyList())
-    val secondRowGenres by viewModel.secondRowGenres.observeAsState(initial = emptyList())
-    val selectedGenre by viewModel.selectedGenre.observeAsState()
-    val selectedGenreSongs by viewModel.selectedGenreSongs.observeAsState(initial = emptyList())
-    val favoriteSongIds by viewModel.favoriteSongIds.observeAsState()
 
     LaunchedEffect (Unit){
         viewModel.initPage()
@@ -137,61 +135,18 @@ fun HomeScreen(
                         when (screenState) {
                             ScreenState.Loading -> {
                                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    CircularProgressIndicator()
+                                    CircularProgressIndicator(color = selectedCategoryColor)
                                 }
                             }
                             ScreenState.Loaded -> {
-                                LazyRow(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(start = 16.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    items(firstRowGenres) { genre ->
-                                        SquareButtonWithImage(
-                                            text = genre.category,
-                                            categoryName = genre.category,
-                                            selected = selectedGenre == genre.category,
-                                            onClick = { /* Handle genre button click */ },
-                                            onSelected = { viewModel.setSelectedGenreName(genre.category) },
-                                            viewModel
-                                        )
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                if (secondRowGenres.isNotEmpty()) {
-                                    LazyRow(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(start = 16.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        items(secondRowGenres) { genre ->
-                                            SquareButtonWithImage(
-                                                text = genre.category,
-                                                categoryName = genre.category,
-                                                selected = selectedGenre == genre.category,
-                                                onClick = { /* Handle genre button click */ },
-                                                onSelected = { viewModel.setSelectedGenreName(genre.category) },
-                                                viewModel
-                                            )
-                                        }
-                                    }
-                                }
+                                GenreList(viewModel = viewModel)
+
                                 Spacer(modifier = Modifier.height(8.dp))
 
-                                LazyColumn {
-                                    items(selectedGenreSongs) { song ->
-                                        SongListItem(
-                                            song = song,
-                                            isFavorite = favoriteSongIds?.contains(song.songID) == true ,
-                                            onFavoriteToggle = {
-                                                viewModel.toggleFavorite(song.songID)
-                                            },
-                                            audioPlayerViewModel = audioPlayerViewModel,
-                                        )
-                                    }
-                                }
+                                SongList(
+                                    viewModel = viewModel,
+                                    audioPlayerViewModel = audioPlayerViewModel
+                                )
                             }
                             ScreenState.Error -> TODO()
                             null -> TODO()

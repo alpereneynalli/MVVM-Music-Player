@@ -43,6 +43,8 @@ class MusicRepository(
 
     suspend fun loadSongDataFromFirebase(): Result<Unit> {
         return runCatching {
+            songCategoryList.clear()
+            songListsByCategory.clear()
             Log.d("FIRE", "fetch started")
 
             // Attempt to download the file
