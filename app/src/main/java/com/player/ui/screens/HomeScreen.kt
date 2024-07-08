@@ -23,34 +23,36 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.SurroundSound
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.player.R
-import com.player.audioPlayer.MediaPlayerViewModel
+import com.player.ui.audioPlayer.MediaPlayerViewModel
 import com.player.ui.composables.IconButtonWithText
 import com.player.ui.composables.SearchBar
 import com.player.ui.composables.SongListItem
 import com.player.ui.composables.SquareButtonWithImage
 import com.player.ui.composables.TopAppBar
-import com.player.ui.navigation.Screen
 import com.player.ui.theme.buttonColor
 import com.player.ui.theme.gradientBrush
 
 @Composable
-fun AddMusicPage(
-    viewModel: AddMusicViewModel,
+fun HomeScreen(
+    viewModel: MainViewModel,
     audioPlayerViewModel: MediaPlayerViewModel,
     onBackClicked: () -> Unit,
     onFavoritesClicked: () -> Unit,
     onDownloadedClicked: () -> Unit
 ) {
-    val selectedGenre = viewModel.getSelectedGenreName()
-    val favoriteSongIds by viewModel.favoriteSongIds
-    val downloadedSongIds by viewModel.downloadedSongIds
+    val firstRowGenres by viewModel.firstRowGenres.observeAsState(initial = emptyList())
+    val secondRowGenres by viewModel.secondRowGenres.observeAsState(initial = emptyList())
+    val selectedGenre by viewModel.selectedGenre.observeAsState()
+    val selectedGenreSongs by viewModel.selectedGenreSongs.observeAsState(initial = emptyList())
+    val favoriteSongIds by viewModel.favoriteSongIds.observeAsState()
+    val currentExpandedItemId by viewModel.currentExpandedItemId.observeAsState(initial = -1)
     Surface(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -131,7 +133,7 @@ fun AddMusicPage(
                                 .padding(start = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            items(viewModel.getFirstRowGenreList()) { genre ->
+                            items(firstRowGenres) { genre ->
                                 SquareButtonWithImage(
                                     text = genre.category,
                                     categoryName = genre.category,
@@ -143,14 +145,14 @@ fun AddMusicPage(
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-                        if (viewModel.getSecondRowGenreList().isNotEmpty()) {
+                        if (secondRowGenres.isNotEmpty()) {
                             LazyRow(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(start = 16.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                items(viewModel.getSecondRowGenreList()) { genre ->
+                                items(secondRowGenres) { genre ->
                                     SquareButtonWithImage(
                                         text = genre.category,
                                         categoryName = genre.category,
@@ -165,24 +167,14 @@ fun AddMusicPage(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         LazyColumn {
-                            items(viewModel.selectedGenreSongs) { song ->
+                            items(selectedGenreSongs) { song ->
                                 SongListItem(
                                     song = song,
-                                    isFavorite = song.songID in favoriteSongIds,
-                                    isDownloaded = song.songID in downloadedSongIds,
+                                    isFavorite = false,
                                     onFavoriteToggle = {
                                         viewModel.toggleFavorite(song.songID)
                                     },
-                                    expandedItemId = viewModel.currentExpandedItemId,
-                                    onItemClicked = { itemId ->
-                                        viewModel.currentExpandedItemId = itemId
-                                    },
-                                    onDownloadClicked = {
-                                        // Handle download button click
-                                        //viewModel.scheduleSongDownload(song.songID, song.fileName)
-                                    },
-                                    audioPlayerViewModel,
-                                    viewModel
+                                    audioPlayerViewModel = audioPlayerViewModel,
                                 )
                             }
                         }

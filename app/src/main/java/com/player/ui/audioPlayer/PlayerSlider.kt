@@ -1,10 +1,11 @@
-package com.player.audioPlayer
+package com.player.ui.audioPlayer
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
@@ -15,8 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun PlayerSlider(viewModel: MediaPlayerViewModel) {
-    val currentMinutes = viewModel.currentMinutes.observeAsState()
+fun PlayerSlider(viewModel: MediaPlayerViewModel?) {
+    val currentMinutes = viewModel?.currentMinutes?.observeAsState()
 
     Column(
         modifier = Modifier
@@ -24,7 +25,7 @@ fun PlayerSlider(viewModel: MediaPlayerViewModel) {
             .padding(horizontal = 16.dp)
     ) {
         Slider(
-            value = currentMinutes.value!!.toFloat(),
+            value = currentMinutes?.value!!.toFloat(),
             onValueChange = { newValue ->
                 viewModel.pause()
                 viewModel.seekTo(newValue.toInt())
@@ -42,7 +43,7 @@ fun PlayerSlider(viewModel: MediaPlayerViewModel) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "${viewModel.formatMilliseconds(currentMinutes.value!!)}",
+                text = viewModel.formatMilliseconds(currentMinutes.value!!),
                 color = Color.White
             )
             Spacer(modifier = Modifier.weight(1f))

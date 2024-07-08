@@ -13,26 +13,25 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.player.R
-import com.player.audioPlayer.MediaPlayerViewModel
+import com.player.ui.audioPlayer.MediaPlayerViewModel
 import com.player.ui.composables.SongListItem
 import com.player.ui.composables.TopAppBar
 import com.player.ui.theme.gradientBrush
 
 
 @Composable
-fun DownloadedFilesPage(
-    viewModel: AddMusicViewModel,
+fun FavoritesPage(
+    viewModel: MainViewModel,
     audioPlayerViewModel: MediaPlayerViewModel,
     onBackClicked: () -> Unit
 ) {
-    val favoriteSongIds by viewModel.favoriteSongIds
-    val downloadedSongIds by viewModel.downloadedSongIds
+    val favoriteSongIds = viewModel.favoriteSongIds.observeAsState()
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -58,11 +57,12 @@ fun DownloadedFilesPage(
                             .padding(4.dp)
                     ) {
                         Spacer(modifier = Modifier.height(2.dp))
+                        /*
                         LazyColumn {
                             items(
                                 viewModel.getSongListsByCategory()
                                     .filter { song ->
-                                        song.songID in downloadedSongIds
+                                        song.songID in favoriteSongIds
                                     }
                             ) { favoriteSong ->
                                 SongListItem(
@@ -85,6 +85,8 @@ fun DownloadedFilesPage(
                                 )
                             }
                         }
+
+                         */
                     }
                 }
             )

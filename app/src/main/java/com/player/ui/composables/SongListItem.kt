@@ -21,11 +21,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -37,38 +34,32 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.player.R
-import com.player.audioPlayer.MediaPlayerViewModel
-import com.player.audioPlayer.PlayerButtons
-import com.player.audioPlayer.PlayerSlider
 import com.player.data.model.OnlineSong
+import com.player.ui.audioPlayer.MediaPlayerViewModel
+import com.player.ui.audioPlayer.PlayerButtons
+import com.player.ui.audioPlayer.PlayerSlider
+import com.player.ui.audioPlayer.SongExpansionState
+import com.player.ui.audioPlayer.SongState
+import com.player.ui.screens.MainViewModel
 import com.player.ui.theme.buttonColor
 import com.player.ui.theme.montserratFont
 import com.player.ui.theme.selectedCategoryColor
-import com.player.ui.screens.AddMusicViewModel
 
 @Composable
 fun SongListItem(
     song: OnlineSong,
     isFavorite: Boolean,
-    isDownloaded: Boolean,
     onFavoriteToggle: () -> Unit,
-    expandedItemId: Int,
-    onItemClicked: (Int) -> Unit,
-    onDownloadClicked: () -> Unit,
-    audioPlayerViewModel: MediaPlayerViewModel,
-    addMusicViewModel: AddMusicViewModel
+    audioPlayerViewModel: MediaPlayerViewModel?,
 ) {
-    val isExpanded = expandedItemId == song.songID
-    val downloadProgress by addMusicViewModel.downloadProgress.observeAsState(0)
-    val context = LocalContext.current
 
-    val currentPlayingSongId by audioPlayerViewModel.currentPlayingSongId.observeAsState()
-    val isCurrentSongPlaying = currentPlayingSongId == song.songID
-
-    Log.d("SongListItem", "Download Progress: $downloadProgress")
+    val songState = audioPlayerViewModel?.songState?.observeAsState()
+    val songExpansionState = audioPlayerViewModel?.songExpansionState?.observeAsState()
+    val currentPlayingSongId = audioPlayerViewModel?.currentPlayingSongId?.observeAsState()
 
     Column(
         modifier = Modifier
@@ -81,35 +72,7 @@ fun SongListItem(
                 .fillMaxWidth()
                 .padding(2.dp)
                 .clickable {
-                    if (!isExpanded) {
-                        onItemClicked(song.songID)
-                        audioPlayerViewModel.stopPlaying()
-                        if (isDownloaded) {
-                            audioPlayerViewModel.triggerMediaScan(context, song.fileName)
-                            val localUri =
-                                audioPlayerViewModel.getDownloadedFileUri(context, song.fileName)
-                            if (localUri != null) {
-                                audioPlayerViewModel.initExoPlayer(localUri)
-                                audioPlayerViewModel.play()
-                                audioPlayerViewModel.setPlayingSongId(song.songID)
-                            }
-                        } else {
-                            audioPlayerViewModel.loadFileFromFirebase(
-                                callback = { uri ->
-                                    audioPlayerViewModel.initExoPlayer(uri)
-                                    audioPlayerViewModel.play()
-                                    audioPlayerViewModel.setPlayingSongId(song.songID)
-                                },
-                                errorCallback = { errorMessage ->
-                                    Log.d("EXO", errorMessage)
-                                },
-                                song.fileName
-                            )
-                        }
-                    } else {
-                        onItemClicked(-1)
-                        audioPlayerViewModel.stopPlaying()
-                    }
+                    audioPlayerViewModel?.handleSong(song)
                 }
         ) {
             Row(
@@ -135,7 +98,7 @@ fun SongListItem(
                     Column {
                         Text(
                             text = song.songName,
-                            color = if (currentPlayingSongId == song.songID) selectedCategoryColor else Color.White,
+                            color = if (currentPlayingSongId?.value == song.songID) selectedCategoryColor else Color.White,
                             fontFamily = montserratFont,
                             fontWeight = FontWeight.W500,
                             fontSize = 12.sp
@@ -170,43 +133,47 @@ fun SongListItem(
                             tint = Color.White
                         )
                     }
-                    if (isDownloaded) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Downloaded",
-                            tint = Color.White
-                        )
-                    } else {
-                        if (downloadProgress in 1..99) {
-                            CircularProgressIndicator(
-                                progress = downloadProgress.toFloat() / 100f,
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        } else {
-                            IconButton(onClick = onDownloadClicked) {
-                                Icon(
-                                    imageVector = Icons.Default.Download,
-                                    contentDescription = "Download",
-                                    tint = Color.White
-                                )
-                            }
-                        }
-                    }
                 }
             }
         }
-
-        if (isExpanded) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (isCurrentSongPlaying) {
-                Column {
-                    PlayerSlider(audioPlayerViewModel)
-                    PlayerButtons(audioPlayerViewModel)
+        if (currentPlayingSongId?.value == song.songID){
+            when (songExpansionState?.value) {
+                SongExpansionState.Expanded -> {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Column {
+                        PlayerSlider(audioPlayerViewModel)
+                        PlayerButtons(audioPlayerViewModel)
+                    }
                 }
+                else -> Unit
             }
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun SongListItemPreview() {
+    // Create dummy data for the preview
+    val song = OnlineSong(
+        songID = 1,
+        songName = "Song Name",
+        musician = "Musician Name",
+        duration = "3:30",
+        category = "Banger",
+        sourceURL = "https://www.example.com/song.mp3",
+        fileName = "song.mp3"
+    )
+
+    // Display the SongListItem with the dummy data
+    Box(modifier = Modifier.background(Color.Black)){
+        SongListItem(
+            song = song,
+            isFavorite = true,
+            onFavoriteToggle = {},
+            audioPlayerViewModel = null,
+        )
+    }
+
+}
+

@@ -1,4 +1,4 @@
-package com.player.audioPlayer
+package com.player.ui.audioPlayer
 
 import android.annotation.SuppressLint
 import android.content.ContentUris
@@ -18,6 +18,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.player.data.model.OnlineSong
 import com.player.utils.CoroutinesDispatchers
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -25,7 +26,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,10 +41,15 @@ class MediaPlayerViewModel @Inject constructor(
         internal const val PLAYBACK_STATE_ENDED = 4
     }
 
+    private val _songState = MutableLiveData<SongState>(SongState.Stopped)
+    val songState: LiveData<SongState> get() = _songState
+
+    private val _songExpansionState = MutableLiveData<SongExpansionState>(SongExpansionState.Closed)
+    val songExpansionState: LiveData<SongExpansionState> get() = _songExpansionState
+
     private val _currentMinutes = MutableLiveData(0)
     val currentMinutes: LiveData<Int> get() = _currentMinutes
-    private val _audioFinish = MutableLiveData(false)
-    val audioFinish: LiveData<Boolean> get() = _audioFinish
+
     private val _isPlaying = MutableLiveData(false)
     val isPlaying: LiveData<Boolean> get() = _isPlaying
     private val _duration = MutableLiveData(0L)
@@ -80,12 +85,14 @@ class MediaPlayerViewModel @Inject constructor(
 
     fun setPlayingSongId(songId: Int) {
         _currentPlayingSongId.value = songId
+        //_songState.value = SongState.Expanded(songId)
     }
 
     fun stopPlaying() {
         _exoPlayer?.stop()
         _isPlaying.postValue(false)
         _currentPlayingSongId.postValue(null)
+        _songState.value = SongState.Stopped
     }
 
     fun seekTo(position: Int) {
@@ -122,10 +129,20 @@ class MediaPlayerViewModel @Inject constructor(
 
     fun play() {
         exoPlayer.play()
+        _songState.value = SongState.Playing
     }
 
     fun pause() {
         exoPlayer.pause()
+        _songState.value = SongState.Paused
+    }
+
+    fun handlePlayPause() {
+        if (_isPlaying.value == true) {
+            pause()
+        } else {
+            play()
+        }
     }
 
     fun initExoPlayer(audioFile: Uri) {
@@ -139,15 +156,12 @@ class MediaPlayerViewModel @Inject constructor(
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         Log.d(TAG, "isPlayingChangedTriggered")
                         _isPlaying.value = isPlaying
-                        if (isPlaying) {
-                            _audioFinish.value = false
-                        }
+
                     }
 
                     override fun onPlaybackStateChanged(playbackState: Int) {
                         when (playbackState) {
                             PLAYBACK_STATE_ENDED -> {
-                                _audioFinish.value = true
                                 Log.d(TAG, "onFinish: Media Player Finished")
                             }
 
@@ -156,6 +170,15 @@ class MediaPlayerViewModel @Inject constructor(
                             }
                         }
                     }
+
+                    override fun onIsLoadingChanged(isLoading: Boolean) {
+                        if (isLoading) {
+                            _songState.value = SongState.Loading
+                        } else {
+                            _songState.value = SongState.Playing
+                        }
+                    }
+
                 })
             }
         } else {
@@ -191,47 +214,41 @@ class MediaPlayerViewModel @Inject constructor(
             }
     }
 
-    fun getDownloadedFileUri(context: Context, songName: String): Uri? {
-        val uri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            MediaStore.Downloads.EXTERNAL_CONTENT_URI
-        } else {
-            Uri.parse(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path)
-        }
-
-        context.contentResolver.query(
-            uri,
-            null,
-            "${MediaStore.Downloads.DISPLAY_NAME}=?",
-            arrayOf(songName),
-            null
-        )?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val uriColumnIndex = cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID)
-                val downloadId = cursor.getLong(uriColumnIndex)
-                return ContentUris.withAppendedId(uri, downloadId)
+    fun handleSong(song: OnlineSong){
+        Log.d("EXO", "Handling song")
+        if(_currentPlayingSongId.value == song.songID){
+            when(_songExpansionState.value){
+                is SongExpansionState.Expanded -> _songExpansionState.value = SongExpansionState.Closed
+                is SongExpansionState.Closed -> _songExpansionState.value = SongExpansionState.Expanded
+                null -> Unit
             }
         }
-
-        return null
+        else{
+            _songExpansionState.value = SongExpansionState.Closed
+            playNewSong(song)
+        }
     }
 
-    fun triggerMediaScan(context: Context, fileName: String) {
-        val downloadsDirPath =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                .toString()
-        val filePath = "$downloadsDirPath/$fileName"
-
-        MediaScannerConnection.scanFile(
-            context,
-            arrayOf(filePath),
-            null
-        ) { path, uri ->
-            Log.i("MediaScanner", "Scanned $path:")
-            Log.i("MediaScanner", "-> uri=$uri")
-        }
+    fun playNewSong(song: OnlineSong){
+        Log.d("EXO", "Playing new song")
+        _songState.value = SongState.Loading
+        stopPlaying()
+        loadFileFromFirebase(
+            callback = { uri ->
+                initExoPlayer(uri)
+                play()
+                setPlayingSongId(song.songID)
+                _songState.value = SongState.Playing
+                _songExpansionState.value = SongExpansionState.Expanded
+            },
+            errorCallback = {
+                _songState.value = SongState.Error
+            },
+            songName = song.fileName)
     }
 
     fun setExoPlayerForTesting(exoPlayer: ExoPlayer) {
         _exoPlayer = exoPlayer
     }
+
 }

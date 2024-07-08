@@ -5,18 +5,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.player.audioPlayer.MediaPlayerViewModel
-import com.player.ui.screens.AddMusicPage
-import com.player.ui.screens.DownloadedFilesPage
+import com.player.ui.audioPlayer.MediaPlayerViewModel
 import com.player.ui.screens.FavoritesPage
-import com.player.ui.screens.AddMusicViewModel
+import com.player.ui.screens.HomeScreen
+import com.player.ui.screens.MainViewModel
 
 @Composable
 fun SetupNavGraph(
     navController: NavHostController
 ) {
-    val viewModel: AddMusicViewModel = hiltViewModel()
+    val viewModel: MainViewModel = hiltViewModel()
     val audioPlayerViewModel: MediaPlayerViewModel = hiltViewModel()
     NavHost(
         navController = navController,
@@ -26,7 +24,7 @@ fun SetupNavGraph(
         composable(
             route = Screen.AddMusicPage.route
         ) {
-            AddMusicPage(
+            HomeScreen(
                 viewModel = viewModel,
                 audioPlayerViewModel = audioPlayerViewModel,
                 onBackClicked = {
@@ -53,16 +51,5 @@ fun SetupNavGraph(
             )
         }
 
-        composable(
-            route = Screen.Downloaded.route
-        ) {
-            DownloadedFilesPage(
-                viewModel = viewModel,
-                audioPlayerViewModel = audioPlayerViewModel,
-                onBackClicked = {
-                    navController.popBackStack()
-                }
-            )
-        }
     }
 }

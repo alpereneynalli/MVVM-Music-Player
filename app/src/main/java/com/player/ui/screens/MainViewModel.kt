@@ -8,9 +8,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.player.data.repository.MusicRepository
 import com.player.data.model.Category
 import com.player.data.model.OnlineSong
+import com.player.data.repository.MusicRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,22 +18,28 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class AddMusicViewModel @Inject constructor(
+class MainViewModel @Inject constructor(
     private val musicRepository: MusicRepository
 ) : ViewModel() {
 
-    var currentExpandedItemId by mutableStateOf(-1)
-    var selectedGenreSongs by mutableStateOf<List<OnlineSong>>(emptyList())
 
-    private var firstRowGenres = emptyList<Category>()
-    private var secondRowGenres = emptyList<Category>()
-    private var selectedGenre: String by mutableStateOf("")
-    private val _downloadedSongIds = mutableStateOf<Set<Int>>(emptySet())
-    val downloadedSongIds: State<Set<Int>> = _downloadedSongIds
-    private val _downloadProgress = MutableLiveData<Int>()
-    val downloadProgress: LiveData<Int> = _downloadProgress
-    private val _favoriteSongIds = mutableStateOf<Set<Int>>(emptySet())
-    val favoriteSongIds: State<Set<Int>> = _favoriteSongIds
+    private val _firstRowGenres = MutableLiveData<List<Category>>()
+    val firstRowGenres: LiveData<List<Category>> = _firstRowGenres
+
+    private val _secondRowGenres = MutableLiveData<List<Category>>()
+    val secondRowGenres: LiveData<List<Category>> = _secondRowGenres
+
+    private val _selectedGenre = MutableLiveData<String>("")
+    var selectedGenre : LiveData<String> = _selectedGenre
+
+    private val _selectedGenreSongs = MutableLiveData<List<OnlineSong>>(emptyList())
+    val selectedGenreSongs: LiveData<List<OnlineSong>> = _selectedGenreSongs
+
+    private val _currentExpandedItemId = MutableLiveData(-1)
+    val currentExpandedItemId: LiveData<Int> = _currentExpandedItemId
+
+    private val _favoriteSongIds = MutableLiveData<Set<Int>>(emptySet())
+    val favoriteSongIds: LiveData<Set<Int>> = _favoriteSongIds
 
     init {
         viewModelScope.launch {
@@ -56,27 +62,28 @@ class AddMusicViewModel @Inject constructor(
 
         withContext(Dispatchers.Main) {
             _favoriteSongIds.value = favoriteSongIds.toMutableSet()
-            _downloadedSongIds.value = downloadedSongIds.toMutableSet()
         }
     }
 
-    private fun initializeGenres(categories: List<Category>, songListsByCategory: Map<String, List<OnlineSong>>) {
+    private fun initializeGenres(
+        categories: List<Category>,
+        songListsByCategory: Map<String, List<OnlineSong>>
+    ) {
         if (categories.isNotEmpty()) {
-            firstRowGenres = categories.subList(0, categories.size / 2)
-            secondRowGenres = categories.subList(categories.size / 2, categories.size)
-            selectedGenre = categories.first().category
+            _firstRowGenres.value = categories.subList(0, categories.size / 2)
+            _secondRowGenres.value = categories.subList(categories.size / 2, categories.size)
+            _selectedGenre.value = categories.first().category
             updateSelectedGenreSongs(songListsByCategory)
         }
     }
 
     private fun updateSelectedGenreSongs(songListsByCategory: Map<String, List<OnlineSong>>) {
-        selectedGenreSongs = songListsByCategory[selectedGenre] ?: emptyList()
+        _selectedGenreSongs.value = songListsByCategory[_selectedGenre.value] ?: emptyList()
     }
 
     fun toggleDownloadedSong(songId: Int) {
         viewModelScope.launch {
             musicRepository.toggleDownloadedSong(songId)
-            _downloadedSongIds.value = musicRepository.getDownloadedSongIds().toMutableSet()
         }
     }
 
@@ -87,24 +94,20 @@ class AddMusicViewModel @Inject constructor(
         }
     }
 
-    fun getSelectedGenreName(): String {
-        return selectedGenre
+    fun getSelectedGenreName(): String? {
+        return _selectedGenre.value
     }
 
     fun setSelectedGenreName(genre: String) {
-        selectedGenre = genre
+        _selectedGenre.value = genre
         viewModelScope.launch {
             val songListsByCategory = musicRepository.getSongListsByCategory()
             updateSelectedGenreSongs(songListsByCategory)
         }
     }
 
-    fun getFirstRowGenreList(): List<Category> {
-        return firstRowGenres
-    }
-
-    fun getSecondRowGenreList(): List<Category> {
-        return secondRowGenres
+    fun setExpandedItemId(itemId: Int) {
+        _currentExpandedItemId.value = itemId
     }
 
     fun getSongListsByCategory(): List<OnlineSong> {

@@ -2,8 +2,7 @@ package com.player.data.model
 
 import com.player.R
 
-data class Category(val category: String, val category_id: Int) {
-}
+data class Category(val category: String, val category_id: Int)
 
 val categoryPictureMap = mapOf<String, Int>(
     "COUNTRY" to R.drawable.country,

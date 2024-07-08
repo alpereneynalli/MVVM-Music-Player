@@ -6,7 +6,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.test.core.app.ApplicationProvider
 import com.google.firebase.storage.FirebaseStorage
-import com.player.audioPlayer.MediaPlayerViewModel
+import com.player.ui.audioPlayer.MediaPlayerViewModel
 import com.player.utils.CoroutinesDispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher

@@ -1,4 +1,4 @@
-package com.player.audioPlayer
+package com.player.ui.audioPlayer
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Forward10
 import androidx.compose.material.icons.filled.PauseCircleFilled
 import androidx.compose.material.icons.filled.PlayCircleFilled
 import androidx.compose.material.icons.filled.Replay10
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -28,20 +29,17 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun PlayerButtons(
-    viewModel: MediaPlayerViewModel,
+    viewModel: MediaPlayerViewModel?,
     playerButtonSize: Dp = 48.dp,
     sideButtonSize: Dp = 36.dp
 ) {
-    val isPlaying by viewModel.isPlaying.observeAsState(initial = false)
+    val songState = viewModel?.songState?.observeAsState()
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        val buttonModifier = Modifier
-            .size(sideButtonSize)
-            .semantics { role = Role.Button }
 
         Image(
             imageVector = Icons.Filled.Replay10,
@@ -51,32 +49,25 @@ fun PlayerButtons(
             modifier = Modifier
                 .size(sideButtonSize)
                 .clickable {
-                    viewModel.backward(10)
+                    viewModel?.backward(10)
                 }
         )
-        Image(
-            imageVector =
-            if (isPlaying) {
-                Icons.Filled.PauseCircleFilled
-            } else {
-                Icons.Filled.PlayCircleFilled
-            },
-            contentDescription = "Play / Pause Icon",
-            contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(Color.White),
-            modifier = Modifier
-                .size(playerButtonSize)
-                .semantics { role = Role.Button }
-                .clickable {
-                    if (isPlaying) {
-                        Log.d("EXO", "pausing")
-                        viewModel.pause()
-                    } else {
-                        Log.d("EXO", "playing")
-                        viewModel.play()
+        when (songState?.value) {
+            SongState.Loading -> CircularProgressIndicator()
+            else -> Image(
+                imageVector = if(songState?.value == SongState.Playing) Icons.Filled.PauseCircleFilled
+                else Icons.Filled.PlayCircleFilled,
+                contentDescription = "Play / Pause Icon",
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.tint(Color.White),
+                modifier = Modifier
+                    .size(playerButtonSize)
+                    .semantics { role = Role.Button }
+                    .clickable {
+                        viewModel?.handlePlayPause()
                     }
-                }
-        )
+            )
+        }
 
         Image(
             imageVector = Icons.Filled.Forward10,
@@ -86,7 +77,7 @@ fun PlayerButtons(
             modifier = Modifier
                 .size(sideButtonSize)
                 .clickable {
-                    viewModel.forward(10)
+                    viewModel?.forward(10)
                 }
         )
     }

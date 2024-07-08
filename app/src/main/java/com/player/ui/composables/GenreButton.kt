@@ -22,9 +22,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.player.data.model.categoryPictureMap
+import com.player.ui.screens.MainViewModel
 import com.player.ui.theme.montserratFont
 import com.player.ui.theme.selectedCategoryColor
-import com.player.ui.screens.AddMusicViewModel
 
 @Composable
 fun SquareButtonWithImage(
@@ -33,7 +33,7 @@ fun SquareButtonWithImage(
     selected: Boolean,
     onClick: () -> Unit,
     onSelected: () -> Unit,
-    viewModel: AddMusicViewModel
+    viewModel: MainViewModel
 ) {
 
     val borderColor = if (selected) selectedCategoryColor else Color.Transparent
