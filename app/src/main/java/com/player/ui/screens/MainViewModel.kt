@@ -9,6 +9,7 @@ import com.player.data.model.OnlineSong
 import com.player.data.repository.MusicRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -61,6 +62,7 @@ class MainViewModel @Inject constructor(
 
         withContext(Dispatchers.Main) {
             _favoriteSongIds.value = favoriteSongIds.toMutableSet()
+            _allSongs.value = songListsByCategory.flatMap { it.value }
         }
     }
 
@@ -95,13 +97,6 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             val songListsByCategory = musicRepository.getSongListsByCategory()
             updateSelectedGenreSongs(songListsByCategory)
-        }
-    }
-
-    fun getSongList() {
-        viewModelScope.launch {
-            val songListsByCategory = musicRepository.getSongListsByCategory().flatMap { it.value }
-            _allSongs.value = songListsByCategory
         }
     }
 

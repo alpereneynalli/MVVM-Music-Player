@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -24,8 +26,11 @@ import androidx.compose.ui.unit.dp
 import com.player.R
 import com.player.ui.audioPlayer.MediaPlayerViewModel
 import com.player.ui.audioPlayer.SongListItem
+import com.player.ui.composables.GenreList
+import com.player.ui.composables.SongList
 import com.player.ui.composables.TopAppBar
 import com.player.ui.theme.gradientBrush
+import com.player.ui.theme.selectedCategoryColor
 
 
 @Composable
@@ -41,9 +46,7 @@ fun FavoritesPage(
             songList.filter { favoriteSongIds?.contains(it.songID) == true }
         }
     }
-    LaunchedEffect (Unit) {
-        viewModel.getSongList()
-    }
+    val screenState by viewModel.screenState.observeAsState()
 
     Surface(
         modifier = Modifier
@@ -71,19 +74,29 @@ fun FavoritesPage(
                     ) {
                         Spacer(modifier = Modifier.height(2.dp))
 
-                        LazyColumn {
-                            items(favoriteSongs.value) { favoriteSong ->
-                                SongListItem(
-                                    song = favoriteSong,
-                                    onFavoriteToggle = {
-                                        viewModel.toggleFavorite(favoriteSong.songID)
-                                    },
-                                    isFavorite = true,
-                                    audioPlayerViewModel = audioPlayerViewModel,
-                                )
+                        when (screenState) {
+                            ScreenState.Loading -> {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator(color = selectedCategoryColor)
+                                }
                             }
+                            ScreenState.Loaded -> {
+                                LazyColumn {
+                                    items(favoriteSongs.value) { favoriteSong ->
+                                        SongListItem(
+                                            song = favoriteSong,
+                                            onFavoriteToggle = {
+                                                viewModel.toggleFavorite(favoriteSong.songID)
+                                            },
+                                            isFavorite = true,
+                                            audioPlayerViewModel = audioPlayerViewModel,
+                                        )
+                                    }
+                                }
+                            }
+                            ScreenState.Error -> TODO()
+                            null -> TODO()
                         }
-
                     }
                 }
             )
