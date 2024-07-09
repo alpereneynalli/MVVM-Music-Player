@@ -34,9 +34,10 @@
             <AndroidTestResultsTableState>
               <option name="preferredColumnWidths">
                 <map>
-                  <entry key="Duration" value="90" />
+                  <entry key="Duration" value="207" />
                   <entry key="Pixel_2_Edited_API_34" value="120" />
-                  <entry key="Tests" value="360" />
+                  <entry key="Tests" value="476" />
+                  <entry key="samsung SM-M307FN" value="236" />
                 </map>
               </option>
             </AndroidTestResultsTableState>

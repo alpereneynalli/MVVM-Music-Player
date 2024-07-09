@@ -2,8 +2,11 @@ package com.player.di
 
 import android.content.Context
 import com.google.firebase.storage.FirebaseStorage
-import com.player.data.repository.MusicRepository
+import com.google.gson.Gson
+import com.player.data.repository.MusicRepositoryImpl
 import com.player.data.roomdb.AppDatabase
+import com.player.data.util.FirebaseDataSource
+import com.player.domain.MusicRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,11 +32,26 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideMusicRepository(
-        appDatabase: AppDatabase,
+    fun provideFirebaseDataSource(
         firebaseStorage: FirebaseStorage,
         @ApplicationContext context: Context
+    ): FirebaseDataSource {
+        return FirebaseDataSource(firebaseStorage, context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGson(): Gson {
+        return Gson()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMusicRepository(
+        appDatabase: AppDatabase,
+        firebaseDataSource: FirebaseDataSource,
+        gson: Gson
     ): MusicRepository {
-        return MusicRepository(appDatabase, firebaseStorage, context)
+        return MusicRepositoryImpl(appDatabase, firebaseDataSource, gson)
     }
 }

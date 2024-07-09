@@ -6,6 +6,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.test.core.app.ApplicationProvider
 import com.google.firebase.storage.FirebaseStorage
+import com.player.domain.MusicRepository
 import com.player.ui.audioPlayer.MediaPlayerViewModel
 import com.player.utils.CoroutinesDispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,13 +25,16 @@ class MediaPlayerViewModelTest {
     private lateinit var viewModel: MediaPlayerViewModel
     private lateinit var mockContext: Context
     private lateinit var mockStorage: FirebaseStorage
+    private lateinit var mockMusicRepository: MusicRepository
     private lateinit var mockExoPlayer: ExoPlayer
 
     @Before
     fun setup() {
+
         mockContext = ApplicationProvider.getApplicationContext()
         mockStorage = mock(FirebaseStorage::class.java)
         mockExoPlayer = mock(ExoPlayer::class.java)
+        mockMusicRepository = mock(MusicRepository::class.java)
 
         val dispatchers = object : CoroutinesDispatchers() {
             override val main = testDispatcher
@@ -38,9 +42,10 @@ class MediaPlayerViewModelTest {
             override val default = testDispatcher
         }
 
-        viewModel = MediaPlayerViewModel(mockContext, mockStorage, dispatchers).apply {
+        viewModel = MediaPlayerViewModel(mockContext, mockMusicRepository, dispatchers).apply {
             setExoPlayerForTesting(mockExoPlayer)
         }
+
     }
 
     @Test

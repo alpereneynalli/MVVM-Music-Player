@@ -11,14 +11,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import com.player.data.model.OnlineSong
+import com.player.domain.MusicRepository
 import com.player.utils.CoroutinesDispatchers
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,14 +23,13 @@ import javax.inject.Inject
 @HiltViewModel
 class MediaPlayerViewModel @Inject constructor(
     @SuppressLint("StaticFieldLeak") @ApplicationContext private val applicationContext: Context,
-    private val storage: FirebaseStorage,
+    private val musicRepository: MusicRepository,
     private val dispatchers: CoroutinesDispatchers
 ) : ViewModel() {
+
     companion object {
-        internal const val TAG = "MediaPlayerViewModel"
-        internal const val UPDATE_INTERVAL_MS = 50L
-        internal const val PLAYBACK_STATE_READY = 3
-        internal const val PLAYBACK_STATE_ENDED = 4
+        private const val TAG = "MediaPlayerViewModel"
+        private const val UPDATE_INTERVAL_MS = 50L
     }
 
     private val _songState = MutableLiveData<SongState>(SongState.Stopped)
@@ -47,6 +43,7 @@ class MediaPlayerViewModel @Inject constructor(
 
     private val _isPlaying = MutableLiveData(false)
     val isPlaying: LiveData<Boolean> get() = _isPlaying
+
     private val _duration = MutableLiveData(0L)
     val duration: LiveData<Long> get() = _duration
 
@@ -64,7 +61,7 @@ class MediaPlayerViewModel @Inject constructor(
         startUpdatingProgress()
     }
 
-    fun startUpdatingProgress(dispatcher: CoroutineDispatcher = Dispatchers.Main) {
+    private fun startUpdatingProgress() {
         viewModelScope.launch(dispatchers.main) {
             while (true) {
                 _exoPlayer?.currentPosition?.toInt()?.let {
@@ -80,14 +77,13 @@ class MediaPlayerViewModel @Inject constructor(
 
     fun setPlayingSongId(songId: Int) {
         _currentPlayingSongId.value = songId
-        //_songState.value = SongState.Expanded(songId)
     }
 
     fun stopPlaying() {
         _exoPlayer?.stop()
         _isPlaying.postValue(false)
         _currentPlayingSongId.postValue(null)
-        _songState.value = SongState.Stopped
+        _songState.postValue(SongState.Stopped)
     }
 
     fun seekTo(position: Int) {
@@ -124,12 +120,12 @@ class MediaPlayerViewModel @Inject constructor(
 
     fun play() {
         exoPlayer.play()
-        _songState.value = SongState.Playing
+        _songState.postValue(SongState.Playing)
     }
 
     fun pause() {
         exoPlayer.pause()
-        _songState.value = SongState.Paused
+        _songState.postValue(SongState.Paused)
     }
 
     fun handlePlayPause() {
@@ -149,18 +145,16 @@ class MediaPlayerViewModel @Inject constructor(
                 seekTo(lastPosition)
                 addListener(object : Player.Listener {
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
-                        Log.d(TAG, "isPlayingChangedTriggered")
                         _isPlaying.value = isPlaying
-
                     }
 
                     override fun onPlaybackStateChanged(playbackState: Int) {
                         when (playbackState) {
-                            PLAYBACK_STATE_ENDED -> {
-                                Log.d(TAG, "onFinish: Media Player Finished")
+                            Player.STATE_ENDED -> {
+                                _songState.value = SongState.Stopped
                             }
 
-                            PLAYBACK_STATE_READY -> {
+                            Player.STATE_READY -> {
                                 _duration.postValue(_exoPlayer?.duration)
                             }
                         }
@@ -173,7 +167,6 @@ class MediaPlayerViewModel @Inject constructor(
                             _songState.value = SongState.Playing
                         }
                     }
-
                 })
             }
         } else {
@@ -187,38 +180,11 @@ class MediaPlayerViewModel @Inject constructor(
         }
     }
 
-    fun loadFileFromFirebase(
-        callback: (Uri) -> Unit,
-        errorCallback: (String) -> Unit,
-        songName: String
-    ) {
-        val storageRef: StorageReference =
-            storage.getReference().child("songs/" + songName)
-
-        storageRef.downloadUrl
-            .addOnSuccessListener { uri ->
-                // Handle the URI here (e.g., display or use it)
-                Log.d("EXO", "Download success")
-                callback(uri)
-            }
-            .addOnFailureListener { exception ->
-                // Handle any errors
-                val errorMessage = "Error getting download URL: ${exception.message}"
-                Log.d("EXO", errorMessage)
-                errorCallback(errorMessage)
-            }
-    }
-
     fun handleSong(song: OnlineSong) {
-        Log.d("EXO", "Handling song")
         if (_currentPlayingSongId.value == song.songID) {
             when (_songExpansionState.value) {
-                is SongExpansionState.Expanded -> _songExpansionState.value =
-                    SongExpansionState.Closed
-
-                is SongExpansionState.Closed -> _songExpansionState.value =
-                    SongExpansionState.Expanded
-
+                is SongExpansionState.Expanded -> _songExpansionState.value = SongExpansionState.Closed
+                is SongExpansionState.Closed -> _songExpansionState.value = SongExpansionState.Expanded
                 null -> Unit
             }
         } else {
@@ -227,27 +193,25 @@ class MediaPlayerViewModel @Inject constructor(
         }
     }
 
-    fun playNewSong(song: OnlineSong) {
-        Log.d("EXO", "Playing new song")
+    private fun playNewSong(song: OnlineSong) {
         _songState.value = SongState.Loading
         stopPlaying()
-        loadFileFromFirebase(
-            callback = { uri ->
-                initExoPlayer(uri)
-                play()
-                setPlayingSongId(song.songID)
-                _songState.value = SongState.Playing
-                _songExpansionState.value = SongExpansionState.Expanded
-            },
-            errorCallback = {
-                _songState.value = SongState.Error
-            },
-            songName = song.fileName
-        )
+        viewModelScope.launch {
+            musicRepository.getSongDownloadUri(song.fileName)
+                .onSuccess { uri ->
+                    initExoPlayer(uri)
+                    play()
+                    setPlayingSongId(song.songID)
+                    _songState.value = SongState.Playing
+                    _songExpansionState.value = SongExpansionState.Expanded
+                }
+                .onFailure {
+                    _songState.value = SongState.Error
+                }
+        }
     }
 
     fun setExoPlayerForTesting(exoPlayer: ExoPlayer) {
         _exoPlayer = exoPlayer
     }
-
 }

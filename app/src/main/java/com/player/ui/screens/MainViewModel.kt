@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.player.data.model.Category
 import com.player.data.model.OnlineSong
-import com.player.data.repository.MusicRepository
+import com.player.domain.MusicRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,7 +48,7 @@ class MainViewModel @Inject constructor(
     }
 
     private suspend fun loadSongDataFromFirebase() {
-        val result = musicRepository.loadSongDataFromFirebase()
+        val result = musicRepository.loadSongData()
         onFirebaseDataLoaded()
     }
 
